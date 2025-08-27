@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "id": "radialmacros",
+  "version": "${version}",
+  "name": "Radial Macros",
+  "description": "A client side mod that adds a radial menu to run configurable commands",
+  "authors": [ "Blast" ],
+  "license": "MIT",
+  "icon": "assets/radialmacros/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "main": [
+      "tech.blastmc.radial.RadialMacros"
+    ],
+    "modmenu": [
+      "tech.blastmc.radial.config.ModMenuImpl"
+    ]
+  },
+  "mixins": [
+    "radialmacros.mixins.json"
+  ],
+  "accessWidener": "radialmacros.accesswidener",
+  "depends": {
+    "fabricloader": ">=0.16.14",
+    "fabric-api": "*",
+    "minecraft": ">=1.21.8",
+    "java": ">=21"
+  }
+}

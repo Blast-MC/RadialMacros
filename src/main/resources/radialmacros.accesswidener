@@ -1,0 +1,11 @@
+accessWidener v2 named
+
+accessible field net/minecraft/client/option/KeyBinding boundKey Lnet/minecraft/client/util/InputUtil$Key;
+accessible field net/minecraft/client/util/InputUtil$Key type Lnet/minecraft/client/util/InputUtil$Type;
+
+accessible method net/minecraft/client/gui/widget/EntryListWidget clearEntries ()V
+accessible method net/minecraft/client/gui/widget/EntryListWidget addEntry (Lnet/minecraft/client/gui/widget/EntryListWidget$Entry;)I
+accessible class net/minecraft/client/gui/widget/EntryListWidget$Entry
+
+accessible method net/minecraft/client/gui/screen/Screen addSelectableChild (Lnet/minecraft/client/gui/Element;)Lnet/minecraft/client/gui/Element;
+accessible method net/minecraft/client/gui/screen/Screen addDrawableChild (Lnet/minecraft/client/gui/Element;)Lnet/minecraft/client/gui/Element;
