@@ -5,7 +5,7 @@
   "name": "Radial Macros",
   "description": "A client side mod that adds a radial menu to run configurable commands",
   "authors": [ "Blast" ],
-  "license": "MIT",
+  "license": "CC0-1.0",
   "icon": "assets/radialmacros/icon.png",
   "environment": "client",
   "entrypoints": {
