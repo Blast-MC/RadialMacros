@@ -4,13 +4,11 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
 import tech.blastmc.radial.config.screen.list.CommandList;
@@ -97,7 +95,7 @@ public class OptionEditScreen extends Screen {
         addSelectableChild(skullOwnerField);
 
         modelField = ScreenUtils.createTextField(textRenderer, width / 2 - 16, 20,
-                option.getItemModel(), "Item Model", input -> {
+                option.getItemModel(), "Item Model", "This is the 'item_model' component, which allows for custom items (optional)", input -> {
                     if (input.equals(option.getItemModel()))
                         return;
                     option.setItemModel(input);
@@ -230,7 +228,6 @@ public class OptionEditScreen extends Screen {
         if (nameField.keyPressed(keyCode, scanCode, modifiers)) return true;
         if (materialField.keyPressed(keyCode, scanCode, modifiers)) return true;
         if (skullOwnerField.keyPressed(keyCode, scanCode, modifiers)) return true;
-        if (enchantedButton.keyPressed(keyCode, scanCode, modifiers)) return true;
         if (rgbField.keyPressed(keyCode, scanCode, modifiers)) return true;
         if (modelField.keyPressed(keyCode, scanCode, modifiers)) return true;
         if (commandsList.keyPressed(keyCode, scanCode, modifiers)) return true;
@@ -242,7 +239,6 @@ public class OptionEditScreen extends Screen {
         if (nameField.keyReleased(keyCode, scanCode, modifiers)) return true;
         if (materialField.keyReleased(keyCode, scanCode, modifiers)) return true;
         if (skullOwnerField.keyReleased(keyCode, scanCode, modifiers)) return true;
-        if (enchantedButton.keyReleased(keyCode, scanCode, modifiers)) return true;
         if (rgbField.keyReleased(keyCode, scanCode, modifiers)) return true;
         if (modelField.keyReleased(keyCode, scanCode, modifiers)) return true;
         if (commandsList.keyReleased(keyCode, scanCode, modifiers)) return true;
@@ -254,7 +250,6 @@ public class OptionEditScreen extends Screen {
         if (nameField.charTyped(chr, modifiers)) return true;
         if (materialField.charTyped(chr, modifiers)) return true;
         if (skullOwnerField.charTyped(chr, modifiers)) return true;
-        if (enchantedButton.charTyped(chr, modifiers)) return true;
         if (rgbField.charTyped(chr, modifiers)) return true;
         if (modelField.charTyped(chr, modifiers)) return true;
         if (commandsList.charTyped(chr, modifiers)) return true;
