@@ -1,18 +1,15 @@
 package tech.blastmc.radial.config.screen.list;
 
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.widget.EntryListWidget;
-import org.jetbrains.annotations.Nullable;
-import tech.blastmc.radial.config.screen.list.entry.CommandEntry;
+import tech.blastmc.radial.config.screen.list.entry.DetailsEntries.IconMiscOptionsEntry;
+import tech.blastmc.radial.config.screen.list.entry.HasTextFieldEntry;
 import tech.blastmc.radial.config.screen.list.entry.ListEntry;
 
-import java.util.Optional;
+public abstract class HalfWidthList extends EntryListWidget<ListEntry> {
 
-public class CommandList extends EntryListWidget<ListEntry> {
-
-    public CommandList(MinecraftClient mc, int width, int height, int top, int itemHeight) {
+    public HalfWidthList(MinecraftClient mc, int width, int height, int top, int itemHeight) {
         super(mc, width, height, top, itemHeight, 0);
     }
 
@@ -20,19 +17,19 @@ public class CommandList extends EntryListWidget<ListEntry> {
     public int getRowWidth() { return width - 24; }
 
     @Override
-    protected int getScrollbarX() { return width * 2 - 6; }
-
-    @Override
     protected void appendClickableNarrations(NarrationMessageBuilder builder) { }
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        for (ListEntry entry : children())
-            if (entry instanceof CommandEntry cmd)
-                cmd.textField.setFocused(false);
+        for (ListEntry entry : children()) {
+            if (entry instanceof HasTextFieldEntry hasTextFieldEntry)
+                hasTextFieldEntry.textField.setFocused(false);
+            if (entry instanceof IconMiscOptionsEntry iconOptionsEntry)
+                iconOptionsEntry.textField2.setFocused(false);
+        }
         for (ListEntry entry : children())
             if (entry.mouseClicked(mouseX, mouseY, button)) return true;
-        return super.mouseClicked(mouseX, mouseY, button);
+        return false;
     }
 
     @Override
@@ -69,4 +66,27 @@ public class CommandList extends EntryListWidget<ListEntry> {
             if (entry.charTyped(chr, modifiers)) return true;
         return super.charTyped(chr, modifiers);
     }
+
+    public static class DetailsList extends HalfWidthList {
+
+        public DetailsList(MinecraftClient mc, int width, int height, int top, int itemHeight) {
+            super(mc, width, height, top, itemHeight);
+        }
+
+        @Override
+        protected int getScrollbarX() { return 0; }
+
+    }
+
+    public static class CommandList extends HalfWidthList {
+
+        public CommandList(MinecraftClient mc, int width, int height, int top, int itemHeight) {
+            super(mc, width, height, top, itemHeight);
+        }
+
+        @Override
+        protected int getScrollbarX() { return width * 2 - 6; }
+
+    }
+
 }

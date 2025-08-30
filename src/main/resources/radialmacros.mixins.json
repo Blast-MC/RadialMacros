@@ -5,7 +5,10 @@
   "compatibilityLevel": "JAVA_21",
   "mixins": [],
   "client": [
-    "MinecraftClientMixin"
+    "ClickableWidgetAccessor",
+    "EntryListWidgetMixin",
+    "MinecraftClientMixin",
+    "ScrollableWidgetAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

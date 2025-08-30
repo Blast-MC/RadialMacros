@@ -2,37 +2,30 @@ package tech.blastmc.radial.config.screen.list.entry;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.tooltip.Tooltip;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.EditBoxWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import tech.blastmc.radial.config.screen.OptionEditScreen;
 import tech.blastmc.radial.util.ScreenUtils;
 
-import java.awt.*;
 import java.util.List;
 
-public class CommandEntry extends ListEntry {
+public class CommandEntry extends HasTextFieldEntry {
 
-    OptionEditScreen screen;
+    Screen screen;
     int index;
     List<String> commands;
 
-    public TextFieldWidget textField;
     private final ButtonWidget deleteBtn;
 
-    public CommandEntry(OptionEditScreen screen, int index, List<String> commands) {
-        super(null);
+    public CommandEntry(Screen screen, int index, List<String> commands) {
 
         this.screen = screen;
         this.index = index;
         this.commands = commands;
 
-        this.textField = ScreenUtils.createTextField(screen.getTextRenderer(), 100, 20,
+        textField = ScreenUtils.createTextField(screen.getTextRenderer(), 100, 20,
                 this.commands.get(index), "/say hello", input -> commands.set(index, input));
-        screen.addSelectableChild(textField);
+        textField.setMaxLength(1000000);
 
         deleteBtn = ButtonWidget.builder(Text.literal("✕"), b -> {
                     commands.remove(this.index);
@@ -54,46 +47,10 @@ public class CommandEntry extends ListEntry {
     }
 
     @Override
-    public void mouseMoved(double mouseX, double mouseY) {
-        textField.mouseMoved(mouseX, mouseY);
-        deleteBtn.mouseMoved(mouseX, mouseY);
-    }
-
-    @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (textField.mouseClicked(mouseX, mouseY, button)) {
-            textField.setFocused(true);
-            return true;
-        }
-        else
-            textField.setFocused(false);
+        if (super.mouseClicked(mouseX, mouseY, button)) return true;
         if (deleteBtn.mouseClicked(mouseX, mouseY, button)) return true;
         return false;
-    }
-
-    @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        textField.mouseReleased(mouseX, mouseY, button);
-        deleteBtn.mouseReleased(mouseX, mouseY, button);
-        return super.mouseReleased(mouseX, mouseY, button);
-    }
-
-    @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (textField.keyPressed(keyCode, scanCode, modifiers)) return true;
-        return super.keyPressed(keyCode, scanCode, modifiers);
-    }
-
-    @Override
-    public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
-        if (textField.keyReleased(keyCode, scanCode, modifiers)) return true;
-        return super.keyReleased(keyCode, scanCode, modifiers);
-    }
-
-    @Override
-    public boolean charTyped(char chr, int modifiers) {
-        if (textField.charTyped(chr, modifiers)) return true;
-        return super.charTyped(chr, modifiers);
     }
 
 }

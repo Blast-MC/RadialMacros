@@ -10,6 +10,10 @@ public abstract class ListEntry extends EntryListWidget.Entry<ListEntry> {
         this.rebuildCallback = rebuildCallback;
     }
 
+    public ListEntry() {
+        this.rebuildCallback = null;
+    }
+
     public void rebuildList() {
         if (this.rebuildCallback != null)
             this.rebuildCallback.run();

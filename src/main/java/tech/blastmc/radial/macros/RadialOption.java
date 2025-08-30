@@ -1,43 +1,22 @@
 package tech.blastmc.radial.macros;
 
-import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.properties.PropertyMap;
-import com.mojang.brigadier.context.CommandContext;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import net.minecraft.block.SkullBlock;
-import net.minecraft.block.entity.SkullBlockEntity;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.block.entity.SkullBlockEntityRenderer;
-import net.minecraft.command.argument.ItemStackArgument;
-import net.minecraft.command.argument.ItemStackArgumentType;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.DyedColorComponent;
 import net.minecraft.component.type.ProfileComponent;
-import net.minecraft.entity.ai.brain.Brain.Profile;
-import net.minecraft.entity.vehicle.CommandBlockMinecartEntity.CommandExecutor;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.StringNbtReader;
 import net.minecraft.registry.Registries;
-import net.minecraft.server.command.CommandManager.CommandParser;
-import net.minecraft.server.command.GiveCommand;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
 import tech.blastmc.radial.util.SkinService;
 
-import java.awt.*;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Data
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
@@ -101,7 +80,7 @@ public class RadialOption {
     }
 
     public RadialOption clone() {
-        return new RadialOption(this.name, this.material, this.rgb, this.itemModel, this.enchanted, this.skullOwner, this.commands, true, 0, null);
+        return new RadialOption(this.name, this.material, this.rgb, this.itemModel, this.enchanted, this.skullOwner, new ArrayList<>(this.commands), true, 0, null);
     }
 
     transient ItemStack cached;
@@ -151,7 +130,5 @@ public class RadialOption {
             return new ItemStack(Items.BARRIER);
         }
     }
-
-    private static final Map<String, CompletableFuture<GameProfile>> PROFILE_CACHE = new ConcurrentHashMap<>();
 
 }

@@ -9,7 +9,6 @@ public class AddEntryEntry extends ListEntry {
     private final ButtonWidget addButton;
 
     public AddEntryEntry(String text, Runnable onClick) {
-        super(null);
         addButton = ButtonWidget.builder(Text.literal(text), b -> onClick.run())
                 .dimensions(0, 0, 120, 20)
                 .build();
