@@ -1,13 +1,16 @@
-package tech.blastmc.radial.macros;
+package tech.blastmc.radial.macros.db;
 
-import lombok.Getter;
 import org.lwjgl.glfw.GLFW;
 import tech.blastmc.radial.config.Config;
+import tech.blastmc.radial.macros.RadialGroup;
+import tech.blastmc.radial.macros.RadialOption;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class Database {
+
+    private final String version = "1.0";
 
     public List<RadialGroup> groups = new ArrayList<>() {{
         add(new RadialGroup("Example Group", GLFW.GLFW_KEY_Y, new ArrayList<>()));
@@ -21,6 +24,11 @@ public class Database {
         if (groups == null)
             return;
         get().groups = groups;
+
+        for (RadialGroup group : get().groups)
+            for (RadialOption option : group.getOptions())
+                option.setGroup(group);
+
     }
 
     public static List<RadialGroup> getGroupsForEdit() {

@@ -13,6 +13,8 @@ import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
+import tech.blastmc.radial.macros.condition.ConditionalConfig;
+import tech.blastmc.radial.macros.condition.ConditionalityRule;
 import tech.blastmc.radial.util.SkinService;
 
 import java.util.ArrayList;
@@ -26,20 +28,29 @@ public class RadialOption {
             "minecraft:leather_leggings", "minecraft:leather_boots", "minecraft:leather_horse_armor", "minecraft:wolf_armor");
 
     private String name;
+    private boolean enabled;
     private String material;
     private String rgb;
     private String itemModel;
     private boolean enchanted;
     private String skullOwner;
     private List<String> commands;
+    private boolean conditional;
+    private List<ConditionalConfig> rules;
 
     private transient boolean skullOwnerProcessed;
     private transient long skullOwnerLastUpdate;
+    private transient RadialGroup group;
 
-    public RadialOption(String name, ItemStack icon, List<String> commands) {
+    public RadialOption(RadialGroup group, String name, ItemStack icon, List<String> commands) {
+        this.group = group;
         this.name = name;
         this.material = icon.getItem().toString();
         this.commands = new ArrayList<>(commands);
+    }
+
+    public RadialOption() {
+        this.enabled = true;
     }
 
     public void clearCachedIcon() {
@@ -80,7 +91,9 @@ public class RadialOption {
     }
 
     public RadialOption clone() {
-        return new RadialOption(this.name, this.material, this.rgb, this.itemModel, this.enchanted, this.skullOwner, new ArrayList<>(this.commands), true, 0, null);
+        return new RadialOption(this.name, this.enabled, this.material, this.rgb, this.itemModel, this.enchanted,
+                this.skullOwner, new ArrayList<>(this.commands), conditional, this.rules == null ? null : new ArrayList<>(this.rules),
+                true, 0, this.group, null);
     }
 
     transient ItemStack cached;
@@ -129,6 +142,28 @@ public class RadialOption {
         } catch (Exception e) {
             return new ItemStack(Items.BARRIER);
         }
+    }
+
+    public boolean isVisible() {
+        if (!enabled)
+            return false;
+
+        if (!conditional)
+            return true;
+
+        for (ConditionalConfig rule : rules)
+            if (rule.getType().needsContext())
+                return rule.getType().testWithContext(rule.getValue(), getContextFor(rule.getType()));
+            else if (!rule.getType().test(rule.getValue()))
+                return false;
+        return true;
+    }
+
+    public Object[] getContextFor(ConditionalityRule type) {
+        return switch (type) {
+            case OPTION_VISIBLE, OPTION_NOT_VISIBLE -> List.of(this.group).toArray(new Object[0]);
+            default -> null;
+        };
     }
 
 }

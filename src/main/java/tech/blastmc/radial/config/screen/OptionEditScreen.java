@@ -12,14 +12,19 @@ import tech.blastmc.radial.config.screen.list.HalfWidthList.CommandList;
 import tech.blastmc.radial.config.screen.list.HalfWidthList.DetailsList;
 import tech.blastmc.radial.config.screen.list.entry.AddEntryEntry;
 import tech.blastmc.radial.config.screen.list.entry.CommandEntry;
+import tech.blastmc.radial.config.screen.list.entry.DetailsEntries.ConditionalRuleEntry;
 import tech.blastmc.radial.config.screen.list.entry.DetailsEntries.DetailsLabelEntry;
 import tech.blastmc.radial.config.screen.list.entry.DetailsEntries.DetailsNameEntry;
 import tech.blastmc.radial.config.screen.list.entry.DetailsEntries.IconEntry;
 import tech.blastmc.radial.config.screen.list.entry.DetailsEntries.IconMiscOptionsEntry;
 import tech.blastmc.radial.config.screen.list.entry.DetailsEntries.ItemModelEntry;
 import tech.blastmc.radial.config.screen.list.entry.DetailsEntries.MaterialEntry;
+import tech.blastmc.radial.config.screen.list.entry.DetailsEntries.VisibilityLabelEntry;
+import tech.blastmc.radial.config.screen.list.entry.DetailsEntries.VisibilityModeEntry;
 import tech.blastmc.radial.macros.RadialGroup;
 import tech.blastmc.radial.macros.RadialOption;
+import tech.blastmc.radial.macros.condition.ConditionalConfig;
+import tech.blastmc.radial.macros.condition.ConditionalityRule;
 
 import java.util.ArrayList;
 
@@ -44,7 +49,7 @@ public class OptionEditScreen extends Screen {
         this.group = group;
 
         if (this.index == -1)
-            this.option = new RadialOption("Macro", new ItemStack(Items.GRASS_BLOCK), new ArrayList<>());
+            this.option = new RadialOption(group, "Macro", new ItemStack(Items.GRASS_BLOCK), new ArrayList<>());
         else
             this.option = group.getOptions().get(index).clone();
     }
@@ -75,17 +80,43 @@ public class OptionEditScreen extends Screen {
         detailsList.addEntry(new MaterialEntry(option));
         detailsList.addEntry(new IconMiscOptionsEntry(option));
         detailsList.addEntry(new ItemModelEntry(option));
+        detailsList.addEntry(new VisibilityLabelEntry());
+        detailsList.addEntry(new VisibilityModeEntry(option, this::refreshDetails));
+
+
+        if (option.getRules() != null) {
+            for (int i = 0; i < option.getRules().size(); i++)
+                detailsList.addEntry(new ConditionalRuleEntry(i, option, this::refreshDetails));
+
+            detailsList.addEntry(new AddEntryEntry("Add Rule", () -> {
+                option.getRules().add(new ConditionalConfig(ConditionalityRule.IS_MULTIPLAYER, null));
+                refreshDetails();
+            }));
+        }
+    }
+
+    private void refreshDetails() {
+        double scroll = commandsList.getScrollY();
+        MinecraftClient.getInstance().setScreen(this);
+        detailsList.setScrollY(detailsList.getMaxScrollY());
+        commandsList.setScrollY(scroll);
+    }
+
+    private void refreshCommands() {
+        double scroll = detailsList.getScrollY();
+        MinecraftClient.getInstance().setScreen(this);
+        commandsList.setScrollY(commandsList.getMaxScrollY());
+        detailsList.setScrollY(scroll);
     }
 
     private void buildCommandList() {
         commandsList.clearEntries();
         for (int i = 0; i < option.getCommands().size(); i++) {
-            commandsList.addEntry(new CommandEntry(this, i, option.getCommands()));
+            commandsList.addEntry(new CommandEntry(i, option.getCommands(), this::refreshCommands));
         }
         commandsList.addEntry(new AddEntryEntry("Add Command", () -> {
             option.getCommands().add("");
-            this.client.setScreen(this);
-            commandsList.setScrollY(commandsList.getMaxScrollY());
+            refreshCommands();
         }));
     }
 
@@ -108,10 +139,9 @@ public class OptionEditScreen extends Screen {
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
-        if (detailsList.isHovered())
-            return detailsList.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
         if (commandsList.isHovered())
             return commandsList.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
+        detailsList.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
         return true;
     }
 

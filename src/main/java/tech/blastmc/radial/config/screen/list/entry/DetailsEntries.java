@@ -2,12 +2,20 @@ package tech.blastmc.radial.config.screen.list.entry;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.text.Text;
 import net.minecraft.util.Util;
+import tech.blastmc.radial.config.screen.widget.EnumDropdownWidget;
+import tech.blastmc.radial.config.screen.widget.ToggleSwitchWidget;
 import tech.blastmc.radial.macros.RadialOption;
+import tech.blastmc.radial.macros.condition.ConditionalConfig;
+import tech.blastmc.radial.macros.condition.ConditionalityRule;
 import tech.blastmc.radial.util.ScreenUtils;
+
+import java.time.Duration;
+import java.util.ArrayList;
 
 public class DetailsEntries {
 
@@ -27,21 +35,36 @@ public class DetailsEntries {
 
     public static class DetailsNameEntry extends HasTextFieldEntry implements CustomHeightEntry {
 
+        ToggleSwitchWidget toggleButton;
+
         public DetailsNameEntry(RadialOption option) {
             this.textField = ScreenUtils.createTextField(MinecraftClient.getInstance().textRenderer, 100, 20, option.getName(), "Name", option::setName);
             this.textField.setMaxLength(32);
+
+            this.toggleButton = new ToggleSwitchWidget(0, 0, 40, 20, option.isEnabled());
+            this.toggleButton.setTooltipDelay(Duration.ofMillis(250));
+            this.toggleButton.setOnChangeListener(option::setEnabled);
         }
 
         @Override
         public void render(DrawContext context, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickProgress) {
-            textField.setWidth(entryWidth);
+            textField.setWidth(entryWidth - 42);
             textField.setPosition(x, y + 2);
             textField.render(context, mouseX, mouseY, tickProgress);
+
+            toggleButton.setPosition(x + entryWidth - 40, y + 2);
+            toggleButton.render(context, mouseX, mouseY, tickProgress);
         }
 
         @Override
         public int getItemHeight() {
             return 24;
+        }
+
+        @Override
+        public boolean mouseClicked(double mouseX, double mouseY, int button) {
+            if (toggleButton.mouseClicked(mouseX, mouseY, button)) return true;
+            return super.mouseClicked(mouseX, mouseY, button);
         }
     }
 
@@ -240,6 +263,131 @@ public class DetailsEntries {
             return super.charTyped(chr, modifiers);
         }
 
+    }
+
+    public static class VisibilityLabelEntry extends ListEntry implements CustomHeightEntry {
+
+        @Override
+        public void render(DrawContext context, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickProgress) {
+            context.drawTextWithShadow(MinecraftClient.getInstance().textRenderer, "Visibility",
+                    x, y + entryHeight - MinecraftClient.getInstance().textRenderer.fontHeight / 2,  0xFFFFFFFF);
+        }
+
+        @Override
+        public int getItemHeight() {
+            return 22;
+        }
+    }
+
+    public static class VisibilityModeEntry extends ListEntry implements CustomHeightEntry {
+
+        private ButtonWidget button;
+
+        public VisibilityModeEntry(RadialOption option, Runnable rebuildCallback) {
+            this.button = ButtonWidget.builder(
+                    Text.literal(option.isConditional() ? "Mode: Conditional" : "Mode: Always"), button -> {
+                        option.setConditional(!option.isConditional());
+                        button.setMessage(Text.literal(option.isConditional() ? "Mode: Conditional" : "Mode: Always"));
+
+                        if (option.isConditional())
+                            option.setRules(new ArrayList<>() {{
+                                add(new ConditionalConfig(ConditionalityRule.IS_MULTIPLAYER, null));
+                            }});
+                        else
+                            option.setRules(null);
+
+                        rebuildCallback.run();
+                    }
+            ).build();
+        }
+
+        @Override
+        public void render(DrawContext context, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickProgress) {
+            button.setWidth(entryWidth);
+            button.setPosition(x, y + 4);
+            button.render(context, mouseX, mouseY, tickProgress);
+        }
+
+        @Override
+        public boolean mouseClicked(double mouseX, double mouseY, int button) {
+            return this.button.mouseClicked(mouseX, mouseY, button);
+        }
+
+        @Override
+        public int getItemHeight() {
+            return 22;
+        }
+    }
+
+    public static class ConditionalRuleEntry extends HasTextFieldEntry implements CustomHeightEntry {
+
+        private final RadialOption option;
+        private final int id;
+        public final EnumDropdownWidget<ConditionalityRule> widget;
+        private final ButtonWidget deleteButton;
+
+        public ConditionalRuleEntry(int id, RadialOption option, Runnable rebuildCallback) {
+            this.option = option;
+            this.id = id;
+
+            ConditionalConfig config = option.getRules().get(id);
+
+            this.textField = ScreenUtils.createTextField(MinecraftClient.getInstance().textRenderer, 100, 20,
+                    config.getValue() == null ? "" : config.getValue(), "Value", config::setValue);
+            this.textField.setTooltip(Tooltip.of(Text.literal("Use a comma (,) to separate multiple values")));
+            this.textField.setTooltipDelay(Duration.ofMillis(250));
+
+            this.widget = new EnumDropdownWidget<>("conditional-rule-" + id,0, 0, 100, 20, config.getType(), ConditionalityRule::getDisplay);
+            this.widget.setOnChangeListener(rule -> {
+                ConditionalityRule oldRule = config.getType();
+                if (oldRule.getType() == null || !oldRule.getType().equals(rule.getType())) {
+                    System.out.println("Clearing value");
+                    config.setValue(null);
+                    this.textField.setText("");
+                }
+                config.setType(rule);
+            });
+            this.deleteButton = ButtonWidget.builder(Text.literal("✕"), button -> {
+                option.getRules().remove(id);
+                if (option.getRules().isEmpty())
+                    option.getRules().add(new ConditionalConfig(ConditionalityRule.IS_MULTIPLAYER, null));
+
+                rebuildCallback.run();
+            }).dimensions(0, 0, 20, 20).build();
+        }
+
+        @Override
+        public void render(DrawContext context, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickProgress) {
+            this.textField.setWidth(entryWidth / 2 - 2 - 20);
+            this.textField.setPosition(x  + (entryWidth / 2) + 1, y + 4);
+            if (option.getRules().get(id).getType().hasValue())
+                this.textField.render(context, mouseX, mouseY, tickProgress);
+
+            this.deleteButton.setPosition(x + entryWidth - 20, y + 4);
+            this.deleteButton.render(context, mouseX, mouseY, tickProgress);
+
+            this.widget.setPosition(x, y + 4);
+            this.widget.setDimensions(entryWidth / 2 - 1, 20);
+            this.widget.render(context, mouseX, mouseY, tickProgress);
+        }
+
+        @Override
+        public boolean mouseClicked(double mouseX, double mouseY, int button) {
+            if (this.widget.mouseClicked(mouseX, mouseY, button)) return true;
+            if (this.deleteButton.mouseClicked(mouseX, mouseY, button)) return true;
+            return super.mouseClicked(mouseX, mouseY, button);
+        }
+
+        @Override
+        public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+            if (this.widget.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount)) return true;
+            return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
+        }
+
+        @Override
+        public int getItemHeight() {
+            return option.getRules().size() == id + 1 ? 24 : 22;
+        }
     }
 
     public static class SpacerEntry extends ListEntry implements CustomHeightEntry {

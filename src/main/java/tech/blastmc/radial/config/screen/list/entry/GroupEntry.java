@@ -8,7 +8,6 @@ import net.minecraft.text.Text;
 import tech.blastmc.radial.macros.RadialGroup;
 
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 
 public class GroupEntry extends ListEntry {

@@ -7,9 +7,13 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 public class ScreenUtils {
+
+    public static final List<Runnable> LAST_RENDERS = new ArrayList<>();
 
     public static TextFieldWidget createTextField(TextRenderer textRenderer, int width, int height, String text, String placeholder, Consumer<String> onChangeLister) {
         return ScreenUtils.createTextField(textRenderer, width, height, text, placeholder, null, onChangeLister);

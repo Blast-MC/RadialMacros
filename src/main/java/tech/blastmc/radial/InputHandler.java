@@ -8,14 +8,16 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.lwjgl.glfw.GLFW;
 import tech.blastmc.radial.config.screen.RadialGroupsScreen;
-import tech.blastmc.radial.macros.Database;
 import tech.blastmc.radial.macros.RadialGroup;
+import tech.blastmc.radial.macros.RadialOption;
+import tech.blastmc.radial.macros.db.Database;
 import tech.blastmc.radial.screen.RadialMenuScreen;
 import tech.blastmc.radial.util.KeyboardUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -71,12 +73,14 @@ public class InputHandler {
 
             if (down && !previous && !latched.contains(code)) {
                 lastTriggeredCode = code;
-                if (group.getOptions().isEmpty())
+                List<RadialOption> options = group.getOptions().stream().filter(RadialOption::isVisible).toList();
+
+                if (options.isEmpty())
                     client.inGameHud.getChatHud().addMessage(ZERO_OPTIONS_MESSAGE);
-                else if (group.getOptions().size() == 1)
-                    group.getOptions().getFirst().run();
+                else if (options.size() == 1)
+                    options.getFirst().run();
                 else
-                    client.setScreen(new RadialMenuScreen(group.getOptions(), KeyboardUtils.toKey(code)));
+                    client.setScreen(new RadialMenuScreen(options, KeyboardUtils.toKey(code)));
                 return;
             }
         }

@@ -9,7 +9,6 @@ import net.minecraft.client.util.InputUtil;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.lwjgl.glfw.GLFW;
-import tech.blastmc.radial.InputHandler;
 import tech.blastmc.radial.config.screen.list.OptionList;
 import tech.blastmc.radial.config.screen.list.entry.AddEntryEntry;
 import tech.blastmc.radial.config.screen.list.entry.OptionEntry;

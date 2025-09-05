@@ -2,7 +2,6 @@ package tech.blastmc.radial.config.screen.list.entry;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.text.Text;
 import tech.blastmc.radial.util.ScreenUtils;
@@ -11,19 +10,16 @@ import java.util.List;
 
 public class CommandEntry extends HasTextFieldEntry {
 
-    Screen screen;
     int index;
     List<String> commands;
 
     private final ButtonWidget deleteBtn;
 
-    public CommandEntry(Screen screen, int index, List<String> commands) {
-
-        this.screen = screen;
+    public CommandEntry(int index, List<String> commands, Runnable rebuildCallback) {
         this.index = index;
         this.commands = commands;
 
-        textField = ScreenUtils.createTextField(screen.getTextRenderer(), 100, 20,
+        textField = ScreenUtils.createTextField(MinecraftClient.getInstance().textRenderer, 100, 20,
                 this.commands.get(index), "/say hello", input -> commands.set(index, input));
         textField.setMaxLength(1000000);
 
@@ -31,7 +27,7 @@ public class CommandEntry extends HasTextFieldEntry {
                     commands.remove(this.index);
                     if (commands.isEmpty())
                         commands.add("");
-                    MinecraftClient.getInstance().setScreen(screen);
+                    rebuildCallback.run();
                 })
                 .dimensions(0, 0, 20, 20).build();
     }

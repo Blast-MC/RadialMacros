@@ -2,12 +2,9 @@ package tech.blastmc.radial.config;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.reflect.TypeToken;
 import net.fabricmc.loader.api.FabricLoader;
-import tech.blastmc.radial.macros.Database;
-import tech.blastmc.radial.macros.RadialGroup;
+import tech.blastmc.radial.macros.db.Database;
 
 import java.io.File;
 import java.io.FileReader;
@@ -15,7 +12,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Reader;
 import java.nio.file.Path;
-import java.util.List;
 
 import static tech.blastmc.radial.RadialMacros.MOD_ID;
 
@@ -77,6 +73,10 @@ public class Config {
 
 	public static void load() {
 		JsonObject json = getJsonObject(CONFIG_FILE);
+        String version = "1.0";
+        if (json.has("version"))
+            version = json.get("version").getAsString();
+        // TODO - data migration if ever needed
 		Database.setGroups(GSON.fromJson(json, Database.class).groups);
 	}
 

@@ -8,8 +8,8 @@ import net.minecraft.text.Text;
 import tech.blastmc.radial.config.screen.list.GroupList;
 import tech.blastmc.radial.config.screen.list.entry.AddEntryEntry;
 import tech.blastmc.radial.config.screen.list.entry.GroupEntry;
-import tech.blastmc.radial.macros.Database;
 import tech.blastmc.radial.macros.RadialGroup;
+import tech.blastmc.radial.macros.db.Database;
 
 import java.util.List;
 import java.util.function.IntConsumer;
