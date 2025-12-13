@@ -1,9 +1,12 @@
 package tech.blastmc.radial.config.screen;
 
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.input.CharInput;
+import net.minecraft.client.input.KeyInput;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.text.Text;
@@ -12,15 +15,7 @@ import tech.blastmc.radial.config.screen.list.HalfWidthList.CommandList;
 import tech.blastmc.radial.config.screen.list.HalfWidthList.DetailsList;
 import tech.blastmc.radial.config.screen.list.entry.AddEntryEntry;
 import tech.blastmc.radial.config.screen.list.entry.CommandEntry;
-import tech.blastmc.radial.config.screen.list.entry.DetailsEntries.ConditionalRuleEntry;
-import tech.blastmc.radial.config.screen.list.entry.DetailsEntries.DetailsLabelEntry;
-import tech.blastmc.radial.config.screen.list.entry.DetailsEntries.DetailsNameEntry;
-import tech.blastmc.radial.config.screen.list.entry.DetailsEntries.IconEntry;
-import tech.blastmc.radial.config.screen.list.entry.DetailsEntries.IconMiscOptionsEntry;
-import tech.blastmc.radial.config.screen.list.entry.DetailsEntries.ItemModelEntry;
-import tech.blastmc.radial.config.screen.list.entry.DetailsEntries.MaterialEntry;
-import tech.blastmc.radial.config.screen.list.entry.DetailsEntries.VisibilityLabelEntry;
-import tech.blastmc.radial.config.screen.list.entry.DetailsEntries.VisibilityModeEntry;
+import tech.blastmc.radial.config.screen.list.entry.DetailsEntries.*;
 import tech.blastmc.radial.macros.RadialGroup;
 import tech.blastmc.radial.macros.RadialOption;
 import tech.blastmc.radial.macros.condition.ConditionalConfig;
@@ -121,9 +116,9 @@ public class OptionEditScreen extends Screen {
     }
 
     @Override
-    public void resize(MinecraftClient client, int w, int h) {
-        super.resize(client, w, h);
-        init(client, w, h);
+    public void resize(int w, int h) {
+        super.resize(w, h);
+        init(w, h);
     }
 
     @Override
@@ -146,40 +141,40 @@ public class OptionEditScreen extends Screen {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (doneButton.mouseClicked(mouseX, mouseY, button)) return true;
-        detailsList.mouseClicked(mouseX, mouseY, button);
-        commandsList.mouseClicked(mouseX, mouseY, button);
+    public boolean mouseClicked(Click click, boolean doubled) {
+        if (doneButton.mouseClicked(click, doubled)) return true;
+        detailsList.mouseClicked(click, doubled);
+        commandsList.mouseClicked(click, doubled);
         return false;
     }
 
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        if (doneButton.mouseReleased(mouseX, mouseY, button)) return true;
-        if (detailsList.mouseReleased(mouseX, mouseY, button)) return true;
-        if (commandsList.mouseReleased(mouseX, mouseY, button)) return true;
+    public boolean mouseReleased(Click click) {
+        if (doneButton.mouseReleased(click)) return true;
+        if (detailsList.mouseReleased(click)) return true;
+        if (commandsList.mouseReleased(click)) return true;
         return false;
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (detailsList.keyPressed(keyCode, scanCode, modifiers)) return true;
-        if (commandsList.keyPressed(keyCode, scanCode, modifiers)) return true;
-        return super.keyPressed(keyCode, scanCode, modifiers);
+    public boolean keyPressed(KeyInput keyInput) {
+        if (detailsList.keyPressed(keyInput)) return true;
+        if (commandsList.keyPressed(keyInput)) return true;
+        return super.keyPressed(keyInput);
     }
 
     @Override
-    public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
-        if (detailsList.keyReleased(keyCode, scanCode, modifiers)) return true;
-        if (commandsList.keyReleased(keyCode, scanCode, modifiers)) return true;
+    public boolean keyReleased(KeyInput keyInput) {
+        if (detailsList.keyReleased(keyInput)) return true;
+        if (commandsList.keyReleased(keyInput)) return true;
         return false;
     }
 
     @Override
-    public boolean charTyped(char chr, int modifiers) {
-        if (detailsList.charTyped(chr, modifiers)) return true;
-        if (commandsList.charTyped(chr, modifiers)) return true;
-        return super.charTyped(chr, modifiers);
+    public boolean charTyped(CharInput input) {
+        if (detailsList.charTyped(input)) return true;
+        if (commandsList.charTyped(input)) return true;
+        return super.charTyped(input);
     }
 
     public void commit() {

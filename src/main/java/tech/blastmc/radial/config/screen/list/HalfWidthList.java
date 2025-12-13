@@ -1,8 +1,11 @@
 package tech.blastmc.radial.config.screen.list;
 
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.widget.EntryListWidget;
+import net.minecraft.client.input.CharInput;
+import net.minecraft.client.input.KeyInput;
 import tech.blastmc.radial.config.screen.list.entry.DetailsEntries.ConditionalRuleEntry;
 import tech.blastmc.radial.config.screen.list.entry.DetailsEntries.IconMiscOptionsEntry;
 import tech.blastmc.radial.config.screen.list.entry.HasTextFieldEntry;
@@ -11,7 +14,7 @@ import tech.blastmc.radial.config.screen.list.entry.ListEntry;
 public abstract class HalfWidthList extends EntryListWidget<ListEntry> {
 
     public HalfWidthList(MinecraftClient mc, int width, int height, int top, int itemHeight) {
-        super(mc, width, height, top, itemHeight, 0);
+        super(mc, width, height, top, itemHeight);
     }
 
     @Override
@@ -21,7 +24,7 @@ public abstract class HalfWidthList extends EntryListWidget<ListEntry> {
     protected void appendClickableNarrations(NarrationMessageBuilder builder) { }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(Click click, boolean doubled) {
         for (ListEntry entry : children()) {
             if (entry instanceof HasTextFieldEntry hasTextFieldEntry)
                 hasTextFieldEntry.textField.setFocused(false);
@@ -31,19 +34,19 @@ public abstract class HalfWidthList extends EntryListWidget<ListEntry> {
         for (ListEntry entry : children()) {
             if (entry instanceof ConditionalRuleEntry conditionalRuleEntry) {
                 if (conditionalRuleEntry.widget.isExpanded())
-                    return conditionalRuleEntry.mouseClicked(mouseX, mouseY, button);
+                    return conditionalRuleEntry.mouseClicked(click, doubled);
             }
         }
         for (ListEntry entry : children())
-            if (entry.mouseClicked(mouseX, mouseY, button)) return true;
+            if (entry.mouseClicked(click, doubled)) return true;
         return false;
     }
 
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+    public boolean mouseReleased(Click click) {
         for (ListEntry entry : children())
-            if (entry.mouseReleased(mouseX, mouseY, button)) return true;
-        return super.mouseReleased(mouseX, mouseY, button);
+            if (entry.mouseReleased(click)) return true;
+        return super.mouseReleased(click);
     }
 
     @Override
@@ -54,24 +57,24 @@ public abstract class HalfWidthList extends EntryListWidget<ListEntry> {
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressed(KeyInput keyInput) {
         for (ListEntry entry : children())
-            if (entry.keyPressed(keyCode, scanCode, modifiers)) return true;
-        return super.keyPressed(keyCode, scanCode, modifiers);
+            if (entry.keyPressed(keyInput)) return true;
+        return super.keyPressed(keyInput);
     }
 
     @Override
-    public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
+    public boolean keyReleased(KeyInput keyInput) {
         for (ListEntry entry : children())
-            if (entry.keyReleased(keyCode, scanCode, modifiers)) return true;
-        return super.keyReleased(keyCode, scanCode, modifiers);
+            if (entry.keyReleased(keyInput)) return true;
+        return super.keyReleased(keyInput);
     }
 
     @Override
-    public boolean charTyped(char chr, int modifiers) {
+    public boolean charTyped(CharInput input) {
         for (ListEntry entry : children())
-            if (entry.charTyped(chr, modifiers)) return true;
-        return super.charTyped(chr, modifiers);
+            if (entry.charTyped(input)) return true;
+        return super.charTyped(input);
     }
 
     @Override

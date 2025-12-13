@@ -1,10 +1,6 @@
 package tech.blastmc.radial.util;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import com.google.gson.*;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.client.MinecraftClient;
 
@@ -112,8 +108,8 @@ public final class SkinService {
                                 if (value == null) throw new RuntimeException("No textures property");
 
                                 GameProfile gp = new GameProfile(uuid, apiName);
-                                if (sig != null) gp.getProperties().put("textures", new com.mojang.authlib.properties.Property("textures", value, null));
-                                else gp.getProperties().put("textures", new com.mojang.authlib.properties.Property("textures", value));
+                                if (sig != null) gp.properties().put("textures", new com.mojang.authlib.properties.Property("textures", value, null));
+                                else gp.properties().put("textures", new com.mojang.authlib.properties.Property("textures", value));
 
                                 // Update cache on MC thread for safety
                                 MinecraftClient.getInstance().execute(() -> {
@@ -129,7 +125,7 @@ public final class SkinService {
     }
 
     private boolean hasTextures(GameProfile gp) {
-        return gp.getProperties() != null && gp.getProperties().get("textures") != null && !gp.getProperties().get("textures").isEmpty();
+        return gp.properties() != null && gp.properties().get("textures") != null && !gp.properties().get("textures").isEmpty();
     }
 
     private static String sanitize(String s) {

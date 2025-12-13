@@ -1,6 +1,9 @@
 package tech.blastmc.radial.screen;
 
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.input.CharInput;
+import net.minecraft.client.input.KeyInput;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
@@ -22,19 +25,19 @@ public class InGameControlsEnabledScreen extends Screen {
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
+    public boolean keyPressed(KeyInput keyInput) {
+        if (keyInput.key() == GLFW.GLFW_KEY_ESCAPE) {
             close();
             return true;
         }
         return false;
     }
 
-    @Override public boolean keyReleased(int keyCode, int scanCode, int modifiers) { return false; }
-    @Override public boolean charTyped(char chr, int modifiers) { return false; }
+    @Override public boolean keyReleased(KeyInput keyInput) { return false; }
+    @Override public boolean charTyped(CharInput input) { return false; }
 
-    @Override public boolean mouseClicked(double mouseX, double mouseY, int button) { return true; }
-    @Override public boolean mouseReleased(double mouseX, double mouseY, int button) { return true; }
-    @Override public boolean mouseDragged(double mouseX, double mouseY, int button, double dx, double dy) { return true; }
+    @Override public boolean mouseClicked(Click click, boolean doubled) { return true; }
+    @Override public boolean mouseReleased(Click click) { return true; }
+    @Override public boolean mouseDragged(Click click, double offsetX, double offsetY) { return true; }
 
 }

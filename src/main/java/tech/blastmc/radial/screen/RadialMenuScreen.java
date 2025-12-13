@@ -1,8 +1,10 @@
 package tech.blastmc.radial.screen;
 
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.util.InputUtil;
+import net.minecraft.client.util.Window;
 import net.minecraft.text.Text;
 import net.minecraft.util.Util;
 import org.joml.Matrix3x2fStack;
@@ -86,9 +88,9 @@ public class RadialMenuScreen extends InGameControlsEnabledScreen {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
-            boolean inCenter = dist((float) mouseX,(float) mouseY, cx, cy) < innerR * 0.85f;
+    public boolean mouseClicked(Click click, boolean doubled) {
+        if (click.button() == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
+            boolean inCenter = dist((float) click.x(),(float) click.y(), cx, cy) < innerR * 0.85f;
             if (!inCenter && getSelectedOption() != null)
                 activateAndClose();
             else
@@ -96,7 +98,7 @@ public class RadialMenuScreen extends InGameControlsEnabledScreen {
             return true;
         }
 
-        if (button == GLFW.GLFW_MOUSE_BUTTON_RIGHT) {
+        if (click.button() == GLFW.GLFW_MOUSE_BUTTON_RIGHT) {
             cancelAndClose();
             return true;
         }
@@ -117,9 +119,9 @@ public class RadialMenuScreen extends InGameControlsEnabledScreen {
 
     @Override
     public void tick() {
-        long window = MinecraftClient.getInstance().getWindow().getHandle();
+        Window window = MinecraftClient.getInstance().getWindow();
         boolean down = (openKey.type == InputUtil.Type.MOUSE)
-                ? GLFW.glfwGetMouseButton(window, openKey.getCode()) == GLFW.GLFW_PRESS
+                ? GLFW.glfwGetMouseButton(window.getHandle(), openKey.getCode()) == GLFW.GLFW_PRESS
                 : InputUtil.isKeyPressed(window, openKey.getCode());
 
         if (!down)

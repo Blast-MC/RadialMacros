@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.widget.ClickableWidget;
@@ -103,12 +104,12 @@ public class EnumDropdownWidget<T extends Enum<T>> extends ClickableWidget imple
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (this.textField.mouseClicked(mouseX, mouseY, button)) {
+    public boolean mouseClicked(Click click, boolean doubled) {
+        if (this.textField.mouseClicked(click, doubled)) {
             this.expanded = !this.expanded;
             return true;
         }
-        else if (this.expanded && this.entryListWidget.mouseClicked(mouseX, mouseY, button)) return true;
+        else if (this.expanded && this.entryListWidget.mouseClicked(click, doubled)) return true;
         else this.expanded = false;
         return false;
     }
@@ -134,7 +135,7 @@ public class EnumDropdownWidget<T extends Enum<T>> extends ClickableWidget imple
 
         public DropdownEntryList(MinecraftClient client, int width, int height, int y, int itemHeight) {
             super(client, width, height, y, itemHeight);
-            this.headerHeight = 0;
+            this.centerListVertically = false;
         }
 
         @Override
@@ -150,9 +151,9 @@ public class EnumDropdownWidget<T extends Enum<T>> extends ClickableWidget imple
         }
 
         @Override
-        protected void drawScrollbar(DrawContext context) {
+        protected void drawScrollbar(DrawContext context, int mouseX, int mouseY) {
             enableScissor(context);
-            super.drawScrollbar(context);
+            super.drawScrollbar(context, mouseX, mouseY);
             context.disableScissor();
         }
 
@@ -186,14 +187,7 @@ public class EnumDropdownWidget<T extends Enum<T>> extends ClickableWidget imple
         }
 
         @Override
-        public void render(DrawContext context, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickProgress) {
-            context.fill(x - 1 , y - 2, x + entryWidth - 1, y + entryHeight + 2, hovered ? Color.DARK_GRAY.getRGB() : Color.BLACK.getRGB());
-            context.drawTextWithShadow(MinecraftClient.getInstance().textRenderer, Text.literal(display),
-                    x + 2, y + entryHeight / 2 - MinecraftClient.getInstance().textRenderer.fontHeight / 2, 0xFFFFFFFF);
-        }
-
-        @Override
-        public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        public boolean mouseClicked(Click click, boolean doubled) {
             this.onChangeListener.accept(this.value);
             return true;
         }
@@ -201,6 +195,13 @@ public class EnumDropdownWidget<T extends Enum<T>> extends ClickableWidget imple
         @Override
         public int getItemHeight() {
             return itemHeight;
+        }
+
+        @Override
+        public void render(DrawContext context, int mouseX, int mouseY, boolean hovered, float deltaTicks) {
+            context.fill(getX() - 1 , getY() - 2, getX() + getWidth() - 1, getY() + getHeight() + 2, hovered ? Color.DARK_GRAY.getRGB() : Color.BLACK.getRGB());
+            context.drawTextWithShadow(MinecraftClient.getInstance().textRenderer, Text.literal(display),
+                    getX() + 2, getY() + getHeight() / 2 - MinecraftClient.getInstance().textRenderer.fontHeight / 2, 0xFFFFFFFF);
         }
     }
 

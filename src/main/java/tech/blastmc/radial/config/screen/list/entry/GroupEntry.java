@@ -1,11 +1,12 @@
 package tech.blastmc.radial.config.screen.list.entry;
 
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.util.InputUtil;
 import net.minecraft.text.Text;
 import tech.blastmc.radial.macros.RadialGroup;
+import tech.blastmc.radial.util.KeyboardUtils;
 
 import java.util.List;
 import java.util.function.IntConsumer;
@@ -41,35 +42,27 @@ public class GroupEntry extends ListEntry {
     private static int mouseButtonFromCode(int code) { return -code - 1; }
 
     private Text keyTextFor(int code) {
-        if (isMouse(code)) {
-            int btn = mouseButtonFromCode(code);
-            return InputUtil.Type.MOUSE.createFromCode(btn).getLocalizedText(); // e.g. "Button 4"
-        } else {
-            return InputUtil.fromKeyCode(code, 0).getLocalizedText();           // e.g. "R"
-        }
+        return KeyboardUtils.toKey(code).getLocalizedText();
     }
 
     @Override
-    public void render(DrawContext ctx, int rowIndex, int y, int x, int entryWidth, int entryHeight,
-                       int mouseX, int mouseY, boolean hovered, float tickProgress) {
-        this.index = rowIndex;
-
+    public void render(DrawContext ctx, int mouseX, int mouseY, boolean hovered, float tickProgress) {
         int bg = hovered ? 0x33FFFFFF : 0x22000000;
-        ctx.fill(x, y, x + entryWidth, y + entryHeight, bg);
+        ctx.fill(getX(), getY(), getX() + getWidth(), getY() + getHeight(), bg);
 
-        RadialGroup g = groups.get(rowIndex);
+        RadialGroup g = groups.get(index);
 
-        int textY = y + (entryHeight - MinecraftClient.getInstance().textRenderer.fontHeight) / 2;
+        int textY = getY() + (getHeight() - MinecraftClient.getInstance().textRenderer.fontHeight) / 2;
         ctx.drawTextWithShadow(MinecraftClient.getInstance().textRenderer,
                 Text.literal(g.getName()),
-                x + 8, textY, 0xFFFFFFFF);
+                getX() + 8, textY, 0xFFFFFFFF);
 
         ctx.drawCenteredTextWithShadow(MinecraftClient.getInstance().textRenderer,
                 Text.literal("[ ").append(keyTextFor(g.getKeyCode())).append(" ]"),
                 width / 2 + 8, textY, 0xFFFFFFFF);
 
-        int btnY = y + (entryHeight - 20) / 2;
-        int right = x + entryWidth - 4;
+        int btnY = getY() + (getHeight() - 20) / 2;
+        int right = getX() + getWidth() - 4;
         deleteBtn.setX(right - 54);
         deleteBtn.setY(btnY);
         editBtn.setX(right - 54 - 4 - 54);
@@ -80,11 +73,11 @@ public class GroupEntry extends ListEntry {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (editBtn.mouseClicked(mouseX, mouseY, button)) return true;
-        if (deleteBtn.mouseClicked(mouseX, mouseY, button)) return true;
+    public boolean mouseClicked(Click click, boolean doubled) {
+        if (editBtn.mouseClicked(click, doubled)) return true;
+        if (deleteBtn.mouseClicked(click, doubled)) return true;
 
-        if (button == 0) {
+        if (click.button() == 0) {
             onEdit.accept(index);
             return true;
         }
@@ -92,9 +85,9 @@ public class GroupEntry extends ListEntry {
     }
 
     @Override
-    public boolean mouseReleased(double mx, double my, int btn) {
-        editBtn.mouseReleased(mx, my, btn);
-        deleteBtn.mouseReleased(mx, my, btn);
+    public boolean mouseReleased(Click click) {
+        editBtn.mouseReleased(click);
+        deleteBtn.mouseReleased(click);
         return true;
     }
 }

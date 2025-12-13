@@ -1,6 +1,7 @@
 package tech.blastmc.radial.config.screen.list.entry;
 
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.text.Text;
@@ -33,19 +34,19 @@ public class CommandEntry extends HasTextFieldEntry {
     }
 
     @Override
-    public void render(DrawContext context, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickProgress) {
-        textField.setPosition(x + 4, y + 4);
-        textField.setWidth(entryWidth - 4 - 4 - 24);
+    public void render(DrawContext context, int mouseX, int mouseY, boolean hovered, float tickProgress) {
+        textField.setPosition(getX() + 4, getY() + 4);
+        textField.setWidth(getWidth() - 4 - 4 - 24);
         textField.render(context, mouseX, mouseY, tickProgress);
 
-        deleteBtn.setPosition(x + entryWidth - 24, y + 4);
+        deleteBtn.setPosition(getX() + getWidth() - 24, getY() + 4);
         deleteBtn.render(context, mouseX, mouseY, tickProgress);
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (super.mouseClicked(mouseX, mouseY, button)) return true;
-        if (deleteBtn.mouseClicked(mouseX, mouseY, button)) return true;
+    public boolean mouseClicked(Click click, boolean doubled) {
+        if (super.mouseClicked(click, doubled)) return true;
+        if (deleteBtn.mouseClicked(click, doubled)) return true;
         return false;
     }
 

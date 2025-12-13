@@ -1,6 +1,9 @@
 package tech.blastmc.radial.config.screen.list.entry;
 
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.client.input.CharInput;
+import net.minecraft.client.input.KeyInput;
 
 public abstract class HasTextFieldEntry extends ListEntry {
 
@@ -12,38 +15,38 @@ public abstract class HasTextFieldEntry extends ListEntry {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (textField.mouseClicked(mouseX, mouseY, button)) {
+    public boolean mouseClicked(Click click, boolean doubled) {
+        if (textField.mouseClicked(click, doubled)) {
             textField.setFocused(true);
             return true;
         }
         else
             textField.setFocused(false);
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(click, doubled);
     }
 
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        textField.mouseReleased(mouseX, mouseY, button);
-        return super.mouseReleased(mouseX, mouseY, button);
+    public boolean mouseReleased(Click click) {
+        textField.mouseReleased(click);
+        return super.mouseReleased(click);
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (textField.keyPressed(keyCode, scanCode, modifiers)) return true;
-        return super.keyPressed(keyCode, scanCode, modifiers);
+    public boolean keyPressed(KeyInput keyInput) {
+        if (textField.keyPressed(keyInput)) return true;
+        return super.keyPressed(keyInput);
     }
 
     @Override
-    public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
-        if (textField.keyReleased(keyCode, scanCode, modifiers)) return true;
-        return super.keyReleased(keyCode, scanCode, modifiers);
+    public boolean keyReleased(KeyInput keyInput) {
+        if (textField.keyReleased(keyInput)) return true;
+        return super.keyReleased(keyInput);
     }
 
     @Override
-    public boolean charTyped(char chr, int modifiers) {
-        if (textField.charTyped(chr, modifiers)) return true;
-        return super.charTyped(chr, modifiers);
+    public boolean charTyped(CharInput input) {
+        if (textField.charTyped(input)) return true;
+        return super.charTyped(input);
     }
 
 }

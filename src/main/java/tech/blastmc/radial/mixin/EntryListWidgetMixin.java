@@ -27,20 +27,17 @@ import java.util.List;
 public abstract class EntryListWidgetMixin<E extends EntryListWidget.Entry<E>> {
 
     @Shadow @Final protected int itemHeight;
-    @Shadow protected int headerHeight;
 
     @Shadow protected abstract int getRowLeft();
     @Shadow protected abstract int getRowWidth();
-    @Shadow protected abstract E getEntry(int index);
     @Shadow protected abstract int getEntryCount();
     @Shadow protected abstract List<E> children();
-    @Shadow protected abstract void renderEntry(DrawContext context, int mouseX, int mouseY, float delta,
-                                                int index, int x, int y, int entryWidth, int entryHeight);
+    @Shadow protected abstract void renderEntry(DrawContext context, int mouseX, int mouseY, float delta, E entry);
 
     @Unique
     private int rm$getEntryHeightForIndex(int index) {
         if (index < 0 || index >= getEntryCount()) return itemHeight;
-        return rm$getEntryHeight(getEntry(index));
+        return rm$getEntryHeight(children().get(index));
     }
 
     @Unique
@@ -63,7 +60,7 @@ public abstract class EntryListWidgetMixin<E extends EntryListWidget.Entry<E>> {
 
     @Inject(method = "getRowTop", at = @At("HEAD"), cancellable = true)
     private void rm$getRowTop(int index, CallbackInfoReturnable<Integer> cir) {
-        int top = ((ClickableWidgetAccessor) this).rm$invokeGetY() + 4 - (int) ((ScrollableWidgetAccessor) this).rm$invokeGetScrollY() + this.headerHeight + rm$getCumulativeHeightUpTo(index);
+        int top = ((ClickableWidgetAccessor) this).rm$invokeGetY() + 4 - (int) ((ScrollableWidgetAccessor) this).rm$invokeGetScrollY() + rm$getCumulativeHeightUpTo(index);
         cir.setReturnValue(top);
     }
 
@@ -83,7 +80,7 @@ public abstract class EntryListWidgetMixin<E extends EntryListWidget.Entry<E>> {
 
     @Inject(method = "getContentsHeightWithPadding", at = @At("HEAD"), cancellable = true)
     private void rm$getContentsHeightWithPadding(CallbackInfoReturnable<Integer> cir) {
-        int total = headerHeight + 4 + rm$getCumulativeHeightUpTo(getEntryCount());
+        int total = 4 + rm$getCumulativeHeightUpTo(getEntryCount());
         cir.setReturnValue(total);
     }
 
@@ -94,7 +91,7 @@ public abstract class EntryListWidgetMixin<E extends EntryListWidget.Entry<E>> {
         int left = centerX - halfRowWidth;
         int right = centerX + halfRowWidth;
 
-        int relY = MathHelper.floor(y - (double) ((ClickableWidgetAccessor) this).rm$invokeGetY()) - this.headerHeight + (int) ((ScrollableWidgetAccessor) this).rm$invokeGetScrollY() - 4;
+        int relY = MathHelper.floor(y - (double) ((ClickableWidgetAccessor) this).rm$invokeGetY()) + (int) ((ScrollableWidgetAccessor) this).rm$invokeGetScrollY() - 4;
         if (x < left || x > right || relY < 0) {
             cir.setReturnValue(null);
             return;
@@ -105,7 +102,7 @@ public abstract class EntryListWidgetMixin<E extends EntryListWidget.Entry<E>> {
         for (int i = 0; i < count; i++) {
             int h = rm$getEntryHeightForIndex(i);
             if (relY < running + h) {
-                cir.setReturnValue(this.getEntry(i));
+                cir.setReturnValue(children().get(i));
                 return;
             }
             running += h;
@@ -126,7 +123,7 @@ public abstract class EntryListWidgetMixin<E extends EntryListWidget.Entry<E>> {
             int yBottom = yTop + fullHeight;
 
             if (yBottom >= ((ClickableWidgetAccessor) this).rm$invokeGetY() && yTop <= ((ClickableWidgetAccessor) this).rm$invokeGetBottom()) {
-                this.renderEntry(context, mouseX, mouseY, delta, i, rowLeft, yTop, rowWidth, innerHeight);
+                this.renderEntry(context, mouseX, mouseY, delta, children().get(i));
             }
         }
 
@@ -144,24 +141,5 @@ public abstract class EntryListWidgetMixin<E extends EntryListWidget.Entry<E>> {
         ci.cancel();
     }
 
-    @Inject(method = "ensureVisible", at = @At("HEAD"), cancellable = true)
-    private void rm$ensureVisible(E entry, CallbackInfo ci) {
-        int index = this.children().indexOf(entry);
-        if (index >= 0) {
-            int top = rm$getRowTopReturn(index).getReturnValue();
-            int h = rm$getEntryHeight(entry);
-
-            int overTop = top - ((ClickableWidgetAccessor) this).rm$invokeGetY() - 4 - h;
-            if (overTop < 0) {
-                ((ScrollableWidgetAccessor) this).rm$invokeSetScrollY(((ScrollableWidgetAccessor) this).rm$invokeGetScrollY() + overTop);
-            }
-
-            int overBottom = ((ClickableWidgetAccessor) this).rm$invokeGetBottom() - top - h - h;
-            if (overBottom < 0) {
-                ((ScrollableWidgetAccessor) this).rm$invokeSetScrollY(((ScrollableWidgetAccessor) this).rm$invokeGetScrollY() - overBottom);
-            }
-        }
-        ci.cancel();
-    }
 }
 

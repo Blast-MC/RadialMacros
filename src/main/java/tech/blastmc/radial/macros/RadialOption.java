@@ -118,8 +118,8 @@ public class RadialOption {
                 SkinService.get().fetch(skullOwner).thenAccept(gp -> {
                     if (gp == null)
                         return;
-                    if (skullOwner.equals(gp.getName()))
-                        stack.set(DataComponentTypes.PROFILE, new ProfileComponent(gp));
+                    if (skullOwner.equals(gp.name()))
+                        stack.set(DataComponentTypes.PROFILE, ProfileComponent.ofStatic(gp));
                 });
             }
 

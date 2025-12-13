@@ -1,6 +1,7 @@
 package tech.blastmc.radial.config.screen.list.entry;
 
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.text.Text;
@@ -46,20 +47,19 @@ public class OptionEntry extends ListEntry {
     }
 
     @Override
-    public void render(DrawContext ctx, int rowIndex, int y, int x, int entryWidth, int entryHeight,
-                       int mouseX, int mouseY, boolean hovered, float tickProgress) {
+    public void render(DrawContext ctx, int mouseX, int mouseY, boolean hovered, float tickProgress) {
         int bg = hovered ? 0x33FFFFFF : 0x22000000;
-        ctx.fill(x, y, x + entryWidth, y + entryHeight, bg);
+        ctx.fill(getX(), getY(), getX() + getWidth(), getY() + getHeight(), bg);
 
-        ctx.drawItem(option.getIcon(), x + 4, y + (entryHeight - 16) / 2);
+        ctx.drawItem(option.getIcon(), getX() + 4, getY() + (getHeight() - 16) / 2);
 
-        int textY = y + (entryHeight - MinecraftClient.getInstance().textRenderer.fontHeight) / 2 + 1;
+        int textY = getY() + (getHeight() - MinecraftClient.getInstance().textRenderer.fontHeight) / 2 + 1;
         ctx.drawTextWithShadow(MinecraftClient.getInstance().textRenderer,
                 Text.literal(option.getName()),
-                x + 24, textY, 0xFFFFFFFF);
+                getX() + 24, textY, 0xFFFFFFFF);
 
-        int btnY = y + (entryHeight - 20) / 2;
-        int right = x + entryWidth - 4;
+        int btnY = getY() + (getHeight() - 20) / 2;
+        int right = getX() + getWidth() - 4;
         deleteBtn.setX(right - 54);
         deleteBtn.setY(btnY);
         editBtn.setX(right - 54 - 4 - 54);
@@ -79,13 +79,13 @@ public class OptionEntry extends ListEntry {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (upBtn.mouseClicked(mouseX, mouseY, button)) return true;
-        if (downBtn.mouseClicked(mouseX, mouseY, button)) return true;
-        if (editBtn.mouseClicked(mouseX, mouseY, button)) return true;
-        if (deleteBtn.mouseClicked(mouseX, mouseY, button)) return true;
+    public boolean mouseClicked(Click click, boolean doubled) {
+        if (upBtn.mouseClicked(click, doubled)) return true;
+        if (downBtn.mouseClicked(click, doubled)) return true;
+        if (editBtn.mouseClicked(click, doubled)) return true;
+        if (deleteBtn.mouseClicked(click, doubled)) return true;
 
-        if (button == 0) {
+        if (click.button() == 0) {
             onEdit.accept(index);
             return true;
         }
@@ -93,9 +93,9 @@ public class OptionEntry extends ListEntry {
     }
 
     @Override
-    public boolean mouseReleased(double mx, double my, int btn) {
-        editBtn.mouseReleased(mx, my, btn);
-        deleteBtn.mouseReleased(mx, my, btn);
+    public boolean mouseReleased(Click click) {
+        editBtn.mouseReleased(click);
+        deleteBtn.mouseReleased(click);
         return true;
     }
 

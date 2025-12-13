@@ -8,7 +8,7 @@ import tech.blastmc.radial.config.screen.list.entry.ListEntry;
 public class OptionList extends EntryListWidget<ListEntry> {
 
     public OptionList(MinecraftClient mc, int width, int height, int top, int itemHeight) {
-        super(mc, width, height, top, itemHeight, 0);
+        super(mc, width, height, top, itemHeight);
     }
 
     @Override

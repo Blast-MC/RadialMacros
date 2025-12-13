@@ -1,11 +1,11 @@
 package tech.blastmc.radial.config.screen;
 
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.util.InputUtil;
+import net.minecraft.client.input.KeyInput;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.lwjgl.glfw.GLFW;
@@ -13,6 +13,7 @@ import tech.blastmc.radial.config.screen.list.OptionList;
 import tech.blastmc.radial.config.screen.list.entry.AddEntryEntry;
 import tech.blastmc.radial.config.screen.list.entry.OptionEntry;
 import tech.blastmc.radial.macros.RadialGroup;
+import tech.blastmc.radial.util.KeyboardUtils;
 import tech.blastmc.radial.util.ScreenUtils;
 
 import java.util.ArrayList;
@@ -60,12 +61,7 @@ public class RadialGroupEditScreen extends Screen {
     private static int mouseButtonFromCode(int code) { return -code - 1; }
 
     private Text keyTextFor(int code) {
-        if (isMouse(code)) {
-            int btn = mouseButtonFromCode(code);
-            return InputUtil.Type.MOUSE.createFromCode(btn).getLocalizedText();
-        } else {
-            return InputUtil.fromKeyCode(code, 0).getLocalizedText();
-        }
+        return KeyboardUtils.toKey(code).getLocalizedText();
     }
 
     @Override
@@ -110,33 +106,33 @@ public class RadialGroupEditScreen extends Screen {
     }
 
     @Override
-    public void resize(MinecraftClient client, int w, int h) {
-        super.resize(client, w, h);
+    public void resize(int w, int h) {
+        super.resize(w, h);
         rebuildList();
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressed(KeyInput keyInput) {
         if (capturingKey) {
-            if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
+            if (keyInput.key() == GLFW.GLFW_KEY_ESCAPE) {
                 capturingKey = false;
                 return true;
             }
-            group.setKeyCode(keyCode);
+            group.setKeyCode(keyInput.key());
             capturingKey = false;
             return true;
         }
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return super.keyPressed(keyInput);
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(Click click, boolean doubled) {
         if (capturingKey) {
-            group.setKeyCode(codeFromMouseButton(button));
+            group.setKeyCode(codeFromMouseButton(click.button()));
             capturingKey = false;
             return true;
         }
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(click, doubled);
     }
 
     private void commit() {

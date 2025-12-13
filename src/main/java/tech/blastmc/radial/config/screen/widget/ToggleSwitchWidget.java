@@ -3,6 +3,7 @@ package tech.blastmc.radial.config.screen.widget;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.client.gl.RenderPipelines;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ButtonTextures;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
@@ -38,7 +39,7 @@ public class ToggleSwitchWidget extends ClickableWidget {
     }
 
     @Override
-    public void onClick(double mouseX, double mouseY) {
+    public void onClick(Click click, boolean doubled) {
         this.enabled = !this.enabled;
         setTooltip(Tooltip.of(Text.of(enabled ? "Enabled" : "Disabled")));
         if (this.onChangeListener != null)

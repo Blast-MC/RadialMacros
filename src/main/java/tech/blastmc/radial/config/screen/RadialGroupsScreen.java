@@ -1,6 +1,5 @@
 package tech.blastmc.radial.config.screen;
 
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextWidget;
@@ -56,8 +55,8 @@ public class RadialGroupsScreen extends Screen {
     }
 
     @Override
-    public void resize(MinecraftClient client, int w, int h) {
-        super.resize(client, w, h);
+    public void resize(int w, int h) {
+        super.resize(w, h);
         rebuildList();
     }
 

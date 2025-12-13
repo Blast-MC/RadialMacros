@@ -1,10 +1,13 @@
 package tech.blastmc.radial.config.screen.list.entry;
 
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.client.input.CharInput;
+import net.minecraft.client.input.KeyInput;
 import net.minecraft.text.Text;
 import net.minecraft.util.Util;
 import tech.blastmc.radial.config.screen.widget.EnumDropdownWidget;
@@ -22,9 +25,9 @@ public class DetailsEntries {
     public static class DetailsLabelEntry extends ListEntry implements CustomHeightEntry {
 
         @Override
-        public void render(DrawContext context, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickProgress) {
+        public void render(DrawContext context, int mouseX, int mouseY, boolean hovered, float tickProgress) {
             context.drawCenteredTextWithShadow(MinecraftClient.getInstance().textRenderer, "Display Settings",
-                    x + entryWidth / 2, 2 + (y + entryHeight / 2) - MinecraftClient.getInstance().textRenderer.fontHeight / 2, 0xFFFFFFFF);
+                    getX() + getWidth() / 2, 2 + (getY() + getHeight() / 2) - MinecraftClient.getInstance().textRenderer.fontHeight / 2, 0xFFFFFFFF);
         }
 
         @Override
@@ -47,12 +50,12 @@ public class DetailsEntries {
         }
 
         @Override
-        public void render(DrawContext context, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickProgress) {
-            textField.setWidth(entryWidth - 42);
-            textField.setPosition(x, y + 2);
+        public void render(DrawContext context, int mouseX, int mouseY, boolean hovered, float tickProgress) {
+            textField.setWidth(getWidth() - 42);
+            textField.setPosition(getX(), getY() + 2);
             textField.render(context, mouseX, mouseY, tickProgress);
 
-            toggleButton.setPosition(x + entryWidth - 40, y + 2);
+            toggleButton.setPosition(getX() + getWidth() - 40, getY() + 2);
             toggleButton.render(context, mouseX, mouseY, tickProgress);
         }
 
@@ -62,9 +65,9 @@ public class DetailsEntries {
         }
 
         @Override
-        public boolean mouseClicked(double mouseX, double mouseY, int button) {
-            if (toggleButton.mouseClicked(mouseX, mouseY, button)) return true;
-            return super.mouseClicked(mouseX, mouseY, button);
+        public boolean mouseClicked(Click click, boolean doubled) {
+            if (toggleButton.mouseClicked(click, doubled)) return true;
+            return super.mouseClicked(click, doubled);
         }
     }
 
@@ -77,11 +80,11 @@ public class DetailsEntries {
         }
 
         @Override
-        public void render(DrawContext context, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickProgress) {
+        public void render(DrawContext context, int mouseX, int mouseY, boolean hovered, float tickProgress) {
             context.drawTextWithShadow(MinecraftClient.getInstance().textRenderer, "Icon",
-                    x, y + entryHeight - MinecraftClient.getInstance().textRenderer.fontHeight / 2,  0xFFFFFFFF);
+                    getX(), getY() + getHeight() - MinecraftClient.getInstance().textRenderer.fontHeight / 2,  0xFFFFFFFF);
 
-            context.drawItem(option.getIcon(), x + entryWidth - 16, y + entryHeight - 10);
+            context.drawItem(option.getIcon(), getX() + getWidth() - 16, getY() + getHeight() - 10);
         }
 
         @Override
@@ -103,9 +106,9 @@ public class DetailsEntries {
         }
 
         @Override
-        public void render(DrawContext context, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickProgress) {
-            textField.setWidth(entryWidth);
-            textField.setPosition(x, y + 4);
+        public void render(DrawContext context, int mouseX, int mouseY, boolean hovered, float tickProgress) {
+            textField.setWidth(getWidth());
+            textField.setPosition(getX(), getY() + 4);
             textField.render(context, mouseX, mouseY, tickProgress);
         }
 
@@ -129,9 +132,9 @@ public class DetailsEntries {
         }
 
         @Override
-        public void render(DrawContext context, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickProgress) {
-            textField.setWidth(entryWidth);
-            textField.setPosition(x, y + 4);
+        public void render(DrawContext context, int mouseX, int mouseY, boolean hovered, float tickProgress) {
+            textField.setWidth(getWidth());
+            textField.setPosition(getX(), getY() + 4);
             textField.render(context, mouseX, mouseY, tickProgress);
         }
 
@@ -176,17 +179,17 @@ public class DetailsEntries {
         }
 
         @Override
-        public void render(DrawContext context, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickProgress) {
-            enchantedButton.setWidth(entryWidth / 2 - 1);
-            textField.setWidth(entryWidth / 2 - 1);
-            textField2.setWidth(entryWidth / 2 - 1);
+        public void render(DrawContext context, int mouseX, int mouseY, boolean hovered, float tickProgress) {
+            enchantedButton.setWidth(getWidth() / 2 - 1);
+            textField.setWidth(getWidth() / 2 - 1);
+            textField2.setWidth(getWidth() / 2 - 1);
 
-            textField2.setPosition(x  + (entryWidth / 2) + 1, y + 2);
+            textField2.setPosition(getX()  + (getWidth() / 2) + 1, getY() + 2);
 
             if (option.getMaterial().endsWith("player_head")) {
                 textField.visible = true;
                 textField.setFocusUnlocked(true);
-                textField.setPosition(x, y + 2);
+                textField.setPosition(getX(), getY() + 2);
                 enchantedButton.setPosition(0, 0);
                 if (!option.isSkullOwnerProcessed() && Util.getMeasuringTimeMs() - option.getSkullOwnerLastUpdate() > 200) {
                     option.setSkullOwnerProcessed(true);
@@ -199,7 +202,7 @@ public class DetailsEntries {
                 textField.setFocused(false);
                 textField.setFocusUnlocked(false);
                 textField.setPosition(0, 0);
-                enchantedButton.setPosition(x, y + 2);
+                enchantedButton.setPosition(getX(), getY() + 2);
                 enchantedButton.setMessage(option.isEnchanted() ? Text.literal("Enchanted: On") : Text.literal("Enchanted: Off"));
                 enchantedButton.render(context, mouseX, mouseY, tickProgress);
             }
@@ -214,17 +217,17 @@ public class DetailsEntries {
         }
 
         @Override
-        public boolean mouseClicked(double mouseX, double mouseY, int button) {
-            if (enchantedButton.mouseClicked(mouseX, mouseY, button))
+        public boolean mouseClicked(Click click, boolean doubled) {
+            if (enchantedButton.mouseClicked(click, doubled))
                 return true;
-            if (textField.mouseClicked(mouseX, mouseY, button)) {
+            if (textField.mouseClicked(click, doubled)) {
                 textField.setFocused(true);
                 textField2.setFocused(false);
                 return true;
             }
             else
                 textField.setFocused(false);
-            if (textField2.mouseClicked(mouseX, mouseY, button)) {
+            if (textField2.mouseClicked(click, doubled)) {
                 textField2.setFocused(true);
                 textField.setFocused(false);
                 return true;
@@ -235,32 +238,32 @@ public class DetailsEntries {
         }
 
         @Override
-        public boolean mouseReleased(double mouseX, double mouseY, int button) {
-            enchantedButton.mouseReleased(mouseX, mouseY, button);
-            textField.mouseReleased(mouseX, mouseY, button);
-            textField2.mouseReleased(mouseX, mouseY, button);
-            return super.mouseReleased(mouseX, mouseY, button);
+        public boolean mouseReleased(Click click) {
+            enchantedButton.mouseReleased(click);
+            textField.mouseReleased(click);
+            textField2.mouseReleased(click);
+            return super.mouseReleased(click);
         }
 
         @Override
-        public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-            if (textField.keyPressed(keyCode, scanCode, modifiers)) return true;
-            if (textField2.keyPressed(keyCode, scanCode, modifiers)) return true;
-            return super.keyPressed(keyCode, scanCode, modifiers);
+        public boolean keyPressed(KeyInput keyInput) {
+            if (textField.keyPressed(keyInput)) return true;
+            if (textField2.keyPressed(keyInput)) return true;
+            return super.keyPressed(keyInput);
         }
 
         @Override
-        public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
-            if (textField.keyReleased(keyCode, scanCode, modifiers)) return true;
-            if (textField2.keyReleased(keyCode, scanCode, modifiers)) return true;
-            return super.keyReleased(keyCode, scanCode, modifiers);
+        public boolean keyReleased(KeyInput keyInput) {
+            if (textField.keyReleased(keyInput)) return true;
+            if (textField2.keyReleased(keyInput)) return true;
+            return super.keyReleased(keyInput);
         }
 
         @Override
-        public boolean charTyped(char chr, int modifiers) {
-            if (textField.charTyped(chr, modifiers)) return true;
-            if (textField2.charTyped(chr, modifiers)) return true;
-            return super.charTyped(chr, modifiers);
+        public boolean charTyped(CharInput input) {
+            if (textField.charTyped(input)) return true;
+            if (textField2.charTyped(input)) return true;
+            return super.charTyped(input);
         }
 
     }
@@ -268,9 +271,9 @@ public class DetailsEntries {
     public static class VisibilityLabelEntry extends ListEntry implements CustomHeightEntry {
 
         @Override
-        public void render(DrawContext context, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickProgress) {
+        public void render(DrawContext context, int mouseX, int mouseY, boolean hovered, float tickProgress) {
             context.drawTextWithShadow(MinecraftClient.getInstance().textRenderer, "Visibility",
-                    x, y + entryHeight - MinecraftClient.getInstance().textRenderer.fontHeight / 2,  0xFFFFFFFF);
+                    getX(), getY() + getHeight() - MinecraftClient.getInstance().textRenderer.fontHeight / 2,  0xFFFFFFFF);
         }
 
         @Override
@@ -302,15 +305,15 @@ public class DetailsEntries {
         }
 
         @Override
-        public void render(DrawContext context, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickProgress) {
-            button.setWidth(entryWidth);
-            button.setPosition(x, y + 4);
+        public void render(DrawContext context, int mouseX, int mouseY, boolean hovered, float tickProgress) {
+            button.setWidth(getWidth());
+            button.setPosition(getX(), getY() + 4);
             button.render(context, mouseX, mouseY, tickProgress);
         }
 
         @Override
-        public boolean mouseClicked(double mouseX, double mouseY, int button) {
-            return this.button.mouseClicked(mouseX, mouseY, button);
+        public boolean mouseClicked(Click click, boolean doubled) {
+            return this.button.mouseClicked(click, doubled);
         }
 
         @Override
@@ -357,25 +360,25 @@ public class DetailsEntries {
         }
 
         @Override
-        public void render(DrawContext context, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickProgress) {
-            this.textField.setWidth(entryWidth / 2 - 2 - 20);
-            this.textField.setPosition(x  + (entryWidth / 2) + 1, y + 4);
+        public void render(DrawContext context, int mouseX, int mouseY, boolean hovered, float tickProgress) {
+            this.textField.setWidth(getWidth() / 2 - 2 - 20);
+            this.textField.setPosition(getX()  + (getWidth() / 2) + 1, getY() + 4);
             if (option.getRules().get(id).getType().hasValue())
                 this.textField.render(context, mouseX, mouseY, tickProgress);
 
-            this.deleteButton.setPosition(x + entryWidth - 20, y + 4);
+            this.deleteButton.setPosition(getX() + getWidth() - 20, getY() + 4);
             this.deleteButton.render(context, mouseX, mouseY, tickProgress);
 
-            this.widget.setPosition(x, y + 4);
-            this.widget.setDimensions(entryWidth / 2 - 1, 20);
+            this.widget.setPosition(getX(), getY() + 4);
+            this.widget.setDimensions(getWidth() / 2 - 1, 20);
             this.widget.render(context, mouseX, mouseY, tickProgress);
         }
 
         @Override
-        public boolean mouseClicked(double mouseX, double mouseY, int button) {
-            if (this.widget.mouseClicked(mouseX, mouseY, button)) return true;
-            if (this.deleteButton.mouseClicked(mouseX, mouseY, button)) return true;
-            return super.mouseClicked(mouseX, mouseY, button);
+        public boolean mouseClicked(Click click, boolean doubled) {
+            if (this.widget.mouseClicked(click, doubled)) return true;
+            if (this.deleteButton.mouseClicked(click, doubled)) return true;
+            return super.mouseClicked(click, doubled);
         }
 
         @Override
@@ -399,7 +402,7 @@ public class DetailsEntries {
         }
 
         @Override
-        public void render(DrawContext context, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickProgress) {}
+        public void render(DrawContext context, int mouseX, int mouseY, boolean hovered, float tickProgress) {}
 
         @Override
         public int getItemHeight() {

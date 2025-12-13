@@ -4,6 +4,7 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
+import net.minecraft.client.util.Window;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.lwjgl.glfw.GLFW;
@@ -14,12 +15,7 @@ import tech.blastmc.radial.macros.db.Database;
 import tech.blastmc.radial.screen.RadialMenuScreen;
 import tech.blastmc.radial.util.KeyboardUtils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class InputHandler {
 
@@ -37,7 +33,7 @@ public class InputHandler {
         OPEN_CONFIG = KeyBindingHelper.registerKeyBinding(new KeyBinding(
                 "key.radialmacros.openconfig",
                 DEFAULT_KEY,
-                "radialmacros.mod.name"
+                KeyBinding.Category.create(RadialMacros.id("radialmacros.mod.name"))
         ));
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
@@ -53,7 +49,7 @@ public class InputHandler {
     }
 
     public static void pollGroupKeys(MinecraftClient client) {
-        long window = client.getWindow().getHandle();
+        Window window = client.getWindow();
 
         if (client.currentScreen instanceof RadialMenuScreen) {
             updateReleases(window);
@@ -86,7 +82,7 @@ public class InputHandler {
         }
     }
 
-    private static void updateReleases(long window) {
+    private static void updateReleases(Window window) {
         for (Integer code : new ArrayList<>(wasDown.keySet())) {
             boolean down = KeyboardUtils.isKeyDown(window, code);
             if (!down)

@@ -195,7 +195,7 @@ public enum ConditionalityRule {
             return Collections.emptyList();
 
         return network.getPlayerList().stream()
-                .map(entry -> entry.getProfile().getName())
+                .map(entry -> entry.getProfile().name())
                 .filter(Objects::nonNull)
                 .distinct()
                 .toList();

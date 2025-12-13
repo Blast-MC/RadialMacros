@@ -143,12 +143,8 @@ public final class RingAssets {
         }
 
         var ringTex  = new NativeImageBackedTexture(() -> "ui/ring" + key.hashCode(), ring);
-        ringTex.setFilter(true, false);
-        ringTex.setClamp(true);
         ringTex.upload();
         var wedgeTex = new NativeImageBackedTexture(() -> "ui/wedge" + key.hashCode(), wedge);
-        wedgeTex.setFilter(true, false);
-        wedgeTex.setClamp(true);
         wedgeTex.upload();
 
         var tm = MinecraftClient.getInstance().getTextureManager();
