@@ -13,7 +13,7 @@ import tech.blastmc.radial.config.screen.widget.EnumDropdownWidget;
 import tech.blastmc.radial.screen.InGameControlsEnabledScreen;
 
 @Mixin(Gui.class)
-public class MinecraftClientMixin {
+public class GuiMixin {
 
     @Shadow
     public Screen screen;

@@ -8,7 +8,7 @@
     "ClickableWidgetAccessor",
     "ClickableWidgetMixin",
     "EntryListWidgetMixin",
-    "MinecraftClientMixin",
+    "GuiMixin",
     "ScreenMixin",
     "ScrollableWidgetAccessor"
   ],
