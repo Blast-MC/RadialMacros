@@ -1,10 +1,10 @@
 package tech.blastmc.radial.mixin;
 
-import net.minecraft.client.gui.widget.ClickableWidget;
+import net.minecraft.client.gui.components.AbstractWidget;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
-@Mixin(ClickableWidget.class)
+@Mixin(AbstractWidget.class)
 public interface ClickableWidgetAccessor {
     @Invoker("getX") int rm$invokeGetX();
     @Invoker("getY") int rm$invokeGetY();

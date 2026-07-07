@@ -1,11 +1,11 @@
 package tech.blastmc.radial.screen;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gl.RenderPipelines;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.texture.NativeImage;
-import net.minecraft.client.texture.NativeImageBackedTexture;
-import net.minecraft.util.Identifier;
+import com.mojang.blaze3d.platform.NativeImage;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.texture.DynamicTexture;
+import net.minecraft.resources.Identifier;
 import tech.blastmc.radial.RadialMacros;
 
 import java.util.HashMap;
@@ -97,7 +97,7 @@ public final class RingAssets {
 
                 int rgb = (aOutline > 0f) ? outlineRGB : baseRGB;
                 int A   = Math.min(255, Math.max(0, Math.round(aOut * 255f)));
-                ring.setColor(x, y, (A << 24) | (rgb & 0xFFFFFF));
+                ring.setPixelABGR(x, y, (A << 24) | (rgb & 0xFFFFFF));
             }
         }
 
@@ -138,58 +138,58 @@ public final class RingAssets {
                 float aOut = aOutline + aFill * (1f - aOutline);
                 int rgb = (aOutline > 0f) ? outlineRGB : hiRGB;
                 int A   = Math.min(255, Math.max(0, Math.round(aOut * 255f)));
-                wedge.setColor(x, y, (A << 24) | (rgb & 0xFFFFFF));
+                wedge.setPixelABGR(x, y, (A << 24) | (rgb & 0xFFFFFF));
             }
         }
 
-        var ringTex  = new NativeImageBackedTexture(() -> "ui/ring" + key.hashCode(), ring);
+        var ringTex  = new DynamicTexture(() -> "ui/ring" + key.hashCode(), ring);
         ringTex.upload();
-        var wedgeTex = new NativeImageBackedTexture(() -> "ui/wedge" + key.hashCode(), wedge);
+        var wedgeTex = new DynamicTexture(() -> "ui/wedge" + key.hashCode(), wedge);
         wedgeTex.upload();
 
-        var tm = MinecraftClient.getInstance().getTextureManager();
+        var tm = Minecraft.getInstance().getTextureManager();
         Identifier ringId  = RadialMacros.id("ui/ring_"  + key.hashCode());
         Identifier wedgeId = RadialMacros.id("ui/wedge_" + key.hashCode());
-        tm.registerTexture(ringId,  ringTex);
-        tm.registerTexture(wedgeId, wedgeTex);
+        tm.register(ringId,  ringTex);
+        tm.register(wedgeId, wedgeTex);
 
         Ring baked = new Ring(ringId, wedgeId, texSize);
         CACHE.put(key, baked);
         return baked;
     }
 
-    public static void drawRing(DrawContext ctx, Ring ring, int cx, int cy, int outerRadiusPx, float rotationDeg) {
+    public static void drawRing(GuiGraphicsExtractor ctx, Ring ring, int cx, int cy, int outerRadiusPx, float rotationDeg) {
         int size = outerRadiusPx * 2;
         int x0 = -outerRadiusPx, y0 = -outerRadiusPx;
 
-        var m = ctx.getMatrices();
+        var m = ctx.pose();
         m.pushMatrix();
         m.translate(cx, cy);
         m.rotate((float) Math.toRadians(rotationDeg));
-        ctx.drawTexture(RenderPipelines.GUI_TEXTURED, ring.ringId, x0, y0, 0, 0,
+        ctx.blit(RenderPipelines.GUI_TEXTURED, ring.ringId, x0, y0, 0, 0,
                 size, size, ring.texSize, ring.texSize, ring.texSize, ring.texSize);
         m.popMatrix();
     }
 
-    public static void drawWedge(DrawContext ctx, Ring ring, int cx, int cy, int outerRadiusPx, int index, int slices, float startDeg) {
+    public static void drawWedge(GuiGraphicsExtractor ctx, Ring ring, int cx, int cy, int outerRadiusPx, int index, int slices, float startDeg) {
         int size = outerRadiusPx * 2;
         int x0 = -outerRadiusPx, y0 = -outerRadiusPx;
 
         float sectorDeg = 360f / Math.max(1, slices);
         float rotDeg = (index + 0.5f) * sectorDeg + startDeg;
 
-        var m = ctx.getMatrices();
+        var m = ctx.pose();
         m.pushMatrix();
         m.translate(cx, cy);
         m.rotate((float)Math.toRadians(rotDeg));
-        ctx.drawTexture(RenderPipelines.GUI_TEXTURED, ring.wedgeId, x0, y0, 0, 0, size, size, ring.texSize, ring.texSize, ring.texSize, ring.texSize);
+        ctx.blit(RenderPipelines.GUI_TEXTURED, ring.wedgeId, x0, y0, 0, 0, size, size, ring.texSize, ring.texSize, ring.texSize, ring.texSize);
         m.popMatrix();
     }
 
     private static void clearTransparent(NativeImage img) {
         for (int y = 0; y < img.getHeight(); y++)
             for (int x = 0; x < img.getWidth(); x++)
-                img.setColor(x, y, 0x00000000);
+                img.setPixelABGR(x, y, 0x00000000);
     }
 
     private static float smoothstep(float e0, float e1, float x) {

@@ -3,16 +3,16 @@ package tech.blastmc.radial.macros;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.DyedColorComponent;
-import net.minecraft.component.type.ProfileComponent;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.registry.Registries;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.Minecraft;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Util;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.DyedItemColor;
+import net.minecraft.world.item.component.ResolvableProfile;
 import tech.blastmc.radial.macros.condition.ConditionalConfig;
 import tech.blastmc.radial.macros.condition.ConditionalityRule;
 import tech.blastmc.radial.util.SkinService;
@@ -61,23 +61,23 @@ public class RadialOption {
         if (commands == null || commands.isEmpty())
             return;
 
-        MinecraftClient mc = MinecraftClient.getInstance();
+        Minecraft mc = Minecraft.getInstance();
         if (mc == null)
             return;
-        var network = mc.getNetworkHandler();
+        var network = mc.getConnection();
         if (network == null)
             return;
 
         for (String command : commands) {
             String raw = command.startsWith("/") ? command.substring(1) : command;
-            network.sendChatCommand(raw);
+            network.sendCommand(raw);
         }
     }
 
     public void setSkullOwner(String skullOwner) {
         this.skullOwner = skullOwner;
         this.skullOwnerProcessed = false;
-        this.skullOwnerLastUpdate = Util.getMeasuringTimeMs();
+        this.skullOwnerLastUpdate = Util.getMillis();
     }
 
     public boolean isDyeable() {
@@ -106,20 +106,20 @@ public class RadialOption {
             if (material.split(":").length == 1)
                 material = "minecraft:" + material;
 
-            Item item = Registries.ITEM.get(Identifier.of(getMaterial()));
+            Item item = BuiltInRegistries.ITEM.getValue(Identifier.parse(getMaterial()));
             if (item == Items.AIR)
                 throw new IllegalArgumentException();
             ItemStack stack = new ItemStack(item);
 
             if (isEnchanted())
-                stack.set(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, true);
+                stack.set(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true);
 
             if (material.endsWith("player_head") && skullOwner != null && !skullOwner.isEmpty()) {
                 SkinService.get().fetch(skullOwner).thenAccept(gp -> {
                     if (gp == null)
                         return;
                     if (skullOwner.equals(gp.name()))
-                        stack.set(DataComponentTypes.PROFILE, ProfileComponent.ofStatic(gp));
+                        stack.set(DataComponents.PROFILE, ResolvableProfile.createResolved(gp));
                 });
             }
 
@@ -127,14 +127,14 @@ public class RadialOption {
                 String[] p = rgb.trim().split(",");
                 int r = Integer.parseInt(p[0]), g = Integer.parseInt(p[1]), b = Integer.parseInt(p[2]);
                 int color = (r << 16) | (g << 8) | b;
-                stack.set(DataComponentTypes.DYED_COLOR, new DyedColorComponent(color));
+                stack.set(DataComponents.DYED_COLOR, new DyedItemColor(color));
             }
 
             if (itemModel != null && !itemModel.isEmpty()) {
                 String finalModel = itemModel;
                 if (itemModel.split(":").length == 1)
                     finalModel = "minecraft:" + finalModel;
-                stack.set(DataComponentTypes.ITEM_MODEL, Identifier.of(finalModel));
+                stack.set(DataComponents.ITEM_MODEL, Identifier.parse(finalModel));
             }
 
             cached = stack;

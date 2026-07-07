@@ -1,8 +1,8 @@
 package tech.blastmc.radial.config.screen.list.entry;
 
-import net.minecraft.client.gui.widget.EntryListWidget;
+import net.minecraft.client.gui.components.AbstractSelectionList;
 
-public abstract class ListEntry extends EntryListWidget.Entry<ListEntry> {
+public abstract class ListEntry extends AbstractSelectionList.Entry<ListEntry> {
 
     private final Runnable rebuildCallback;
 

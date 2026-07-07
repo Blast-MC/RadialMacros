@@ -2,22 +2,22 @@ package tech.blastmc.radial.config.screen.widget;
 
 import lombok.Getter;
 import lombok.Setter;
-import net.minecraft.client.gl.RenderPipelines;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.ButtonTextures;
-import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
-import net.minecraft.client.gui.tooltip.Tooltip;
-import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.ColorHelper;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.gui.components.WidgetSprites;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.ARGB;
 import tech.blastmc.radial.RadialMacros;
 
 import java.util.function.Consumer;
 
-public class ToggleSwitchWidget extends ClickableWidget {
+public class ToggleSwitchWidget extends AbstractWidget {
 
-    private static final ButtonTextures TEXTURES = new ButtonTextures(
+    private static final WidgetSprites TEXTURES = new WidgetSprites(
             RadialMacros.id("toggle/enabled"), RadialMacros.id("toggle/disabled"),
             RadialMacros.id("toggle/enabled_highlighted"), RadialMacros.id("toggle/disabled_highlighted")
     );
@@ -28,24 +28,24 @@ public class ToggleSwitchWidget extends ClickableWidget {
     Consumer<Boolean> onChangeListener;
 
     public ToggleSwitchWidget(int x, int y, int width, int height, boolean enabled) {
-        super(x, y, width, height, Text.empty());
+        super(x, y, width, height, Component.empty());
         this.enabled = enabled;
-        setTooltip(Tooltip.of(Text.of(enabled ? "Enabled" : "Disabled")));
+        setTooltip(Tooltip.create(Component.nullToEmpty(enabled ? "Enabled" : "Disabled")));
     }
 
     @Override
-    protected void renderWidget(DrawContext context, int mouseX, int mouseY, float deltaTicks) {
-        context.drawGuiTexture(RenderPipelines.GUI_TEXTURED, TEXTURES.get(this.enabled, this.isSelected()), this.getX(), this.getY(), this.getWidth(), this.getHeight(), ColorHelper.getWhite(this.alpha));
+    protected void extractWidgetRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float deltaTicks) {
+        context.blitSprite(RenderPipelines.GUI_TEXTURED, TEXTURES.get(this.enabled, this.isHoveredOrFocused()), this.getX(), this.getY(), this.getWidth(), this.getHeight(), ARGB.white(this.alpha));
     }
 
     @Override
-    public void onClick(Click click, boolean doubled) {
+    public void onClick(MouseButtonEvent click, boolean doubled) {
         this.enabled = !this.enabled;
-        setTooltip(Tooltip.of(Text.of(enabled ? "Enabled" : "Disabled")));
+        setTooltip(Tooltip.create(Component.nullToEmpty(enabled ? "Enabled" : "Disabled")));
         if (this.onChangeListener != null)
             this.onChangeListener.accept(this.enabled);
     }
 
     @Override
-    protected void appendClickableNarrations(NarrationMessageBuilder builder) { }
+    protected void updateWidgetNarration(NarrationElementOutput builder) { }
 }

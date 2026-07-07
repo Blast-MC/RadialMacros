@@ -2,10 +2,10 @@ package tech.blastmc.radial.macros.condition;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayNetworkHandler;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import tech.blastmc.radial.macros.RadialGroup;
 import tech.blastmc.radial.macros.RadialOption;
 
@@ -15,7 +15,7 @@ import java.util.Objects;
 
 @AllArgsConstructor
 public enum ConditionalityRule {
-    PLAYER_ONLINE("Player is online", ServerPlayerEntity.class) {
+    PLAYER_ONLINE("Player is online", ServerPlayer.class) {
         @Override
         public boolean test(String value) {
             if (!isMultiplayer())
@@ -26,7 +26,7 @@ public enum ConditionalityRule {
             return false;
         }
     },
-    PLAYER_OFFLINE("Player not online", ServerPlayerEntity.class) {
+    PLAYER_OFFLINE("Player not online", ServerPlayer.class) {
         @Override
         public boolean test(String value) {
             if (!isMultiplayer())
@@ -43,7 +43,7 @@ public enum ConditionalityRule {
             return isMultiplayer();
         }
     },
-    WORLD_EQUALS("World equals", ServerWorld.class) {
+    WORLD_EQUALS("World equals", ServerLevel.class) {
         @Override
         public boolean test(String value) {
             for (String string : value.split(","))
@@ -52,7 +52,7 @@ public enum ConditionalityRule {
             return false;
         }
     },
-    WORLD_NOT_EQUALS("World not equals", ServerWorld.class) {
+    WORLD_NOT_EQUALS("World not equals", ServerLevel.class) {
         @Override
         public boolean test(String value) {
             for (String string : value.split(","))
@@ -109,24 +109,24 @@ public enum ConditionalityRule {
             return true;
         }
     },
-    SERVER_EQUALS("Server equals", ServerWorld.class) {
+    SERVER_EQUALS("Server equals", ServerLevel.class) {
         @Override
         public boolean test(String value) {
             if (!isMultiplayer())
                 return false;
             for (String string : value.split(","))
-                if (MC.getCurrentServerEntry().address.equalsIgnoreCase(string.trim()))
+                if (MC.getCurrentServer().ip.equalsIgnoreCase(string.trim()))
                     return true;
             return false;
         }
     },
-    SERVER_NOT_EQUALS("Server not equals", ServerWorld.class) {
+    SERVER_NOT_EQUALS("Server not equals", ServerLevel.class) {
         @Override
         public boolean test(String value) {
             if (!isMultiplayer())
                 return true;
             for (String string : value.split(","))
-                if (MC.getCurrentServerEntry().address.equalsIgnoreCase(string.trim()))
+                if (MC.getCurrentServer().ip.equalsIgnoreCase(string.trim()))
                     return false;
             return true;
         }
@@ -154,35 +154,35 @@ public enum ConditionalityRule {
         return true;
     }
 
-    private static final MinecraftClient MC = MinecraftClient.getInstance();
+    private static final Minecraft MC = Minecraft.getInstance();
 
     public static boolean inWorld() {
-        return MC.world != null && MC.player != null;
+        return MC.level != null && MC.player != null;
     }
 
     public static String getWorldName() {
         if (!inWorld())
             return "Unknown";
 
-        if (MC.getNetworkHandler() != null && !MC.getNetworkHandler().getBrand().equalsIgnoreCase("vanilla"))
-            return MC.world.getRegistryKey().getValue().getPath();
-        else if (MC.getServer() != null)
-            return MC.getServer().getSaveProperties().getLevelName();
+        if (MC.getConnection() != null && !MC.getConnection().serverBrand().equalsIgnoreCase("vanilla"))
+            return MC.level.dimension().identifier().getPath();
+        else if (MC.getSingleplayerServer() != null)
+            return MC.getSingleplayerServer().getWorldData().getLevelName();
         return "Unknown";
     }
 
     public static boolean onRemoteMultiplayer() {
-        return inWorld() && MC.getCurrentServerEntry() != null;
+        return inWorld() && MC.getCurrentServer() != null;
     }
 
     public static boolean hostingIntegrated() {
-        return inWorld() && MC.isIntegratedServerRunning();
+        return inWorld() && MC.hasSingleplayerServer();
     }
 
     public static boolean lanOpen() {
         return hostingIntegrated()
-                && MC.getServer() != null
-                && MC.isConnectedToLocalServer();
+                && MC.getSingleplayerServer() != null
+                && MC.isLocalServer();
     }
 
     public static boolean isMultiplayer() {
@@ -190,11 +190,11 @@ public enum ConditionalityRule {
     }
 
     public static List<String> getOnlinePlayers() {
-        ClientPlayNetworkHandler network = MC.getNetworkHandler();
+        ClientPacketListener network = MC.getConnection();
         if (network == null || !isMultiplayer())
             return Collections.emptyList();
 
-        return network.getPlayerList().stream()
+        return network.getOnlinePlayers().stream()
                 .map(entry -> entry.getProfile().name())
                 .filter(Objects::nonNull)
                 .distinct()

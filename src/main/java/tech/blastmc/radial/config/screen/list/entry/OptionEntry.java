@@ -1,10 +1,10 @@
 package tech.blastmc.radial.config.screen.list.entry;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.network.chat.Component;
 import tech.blastmc.radial.macros.RadialGroup;
 import tech.blastmc.radial.macros.RadialOption;
 
@@ -17,10 +17,10 @@ public class OptionEntry extends ListEntry {
     private final IntConsumer onEdit;
 
     private final RadialOption option;
-    private final ButtonWidget upBtn;
-    private final ButtonWidget downBtn;
-    private final ButtonWidget editBtn;
-    private final ButtonWidget deleteBtn;
+    private final Button upBtn;
+    private final Button downBtn;
+    private final Button editBtn;
+    private final Button deleteBtn;
 
     public OptionEntry(int index, RadialGroup group, Runnable rebuildCallback, IntConsumer onEdit) {
         super(rebuildCallback);
@@ -30,32 +30,32 @@ public class OptionEntry extends ListEntry {
 
         this.option = group.getOptions().get(index);
 
-        upBtn = ButtonWidget.builder(Text.literal("↑"), b -> moveUp())
-                .dimensions(0, 0, 20, 20).build();
+        upBtn = Button.builder(Component.literal("↑"), b -> moveUp())
+                .bounds(0, 0, 20, 20).build();
 
-        downBtn = ButtonWidget.builder(Text.literal("↓"), b -> moveDown())
-                .dimensions(0, 0, 20, 20).build();
+        downBtn = Button.builder(Component.literal("↓"), b -> moveDown())
+                .bounds(0, 0, 20, 20).build();
 
-        editBtn = ButtonWidget.builder(Text.literal("Edit"), b -> onEdit.accept(index))
-                .dimensions(0, 0, 54, 20).build();
+        editBtn = Button.builder(Component.literal("Edit"), b -> onEdit.accept(index))
+                .bounds(0, 0, 54, 20).build();
 
-        deleteBtn = ButtonWidget.builder(Text.literal("Delete"), b -> {
+        deleteBtn = Button.builder(Component.literal("Delete"), b -> {
                     group.getOptions().remove(this.index);
                     rebuildList();
                 })
-                .dimensions(0, 0, 54, 20).build();
+                .bounds(0, 0, 54, 20).build();
     }
 
     @Override
-    public void render(DrawContext ctx, int mouseX, int mouseY, boolean hovered, float tickProgress) {
+    public void extractContent(GuiGraphicsExtractor ctx, int mouseX, int mouseY, boolean hovered, float tickProgress) {
         int bg = hovered ? 0x33FFFFFF : 0x22000000;
         ctx.fill(getX(), getY(), getX() + getWidth(), getY() + getHeight(), bg);
 
-        ctx.drawItem(option.getIcon(), getX() + 4, getY() + (getHeight() - 16) / 2);
+        ctx.item(option.getIcon(), getX() + 4, getY() + (getHeight() - 16) / 2);
 
-        int textY = getY() + (getHeight() - MinecraftClient.getInstance().textRenderer.fontHeight) / 2 + 1;
-        ctx.drawTextWithShadow(MinecraftClient.getInstance().textRenderer,
-                Text.literal(option.getName()),
+        int textY = getY() + (getHeight() - Minecraft.getInstance().font.lineHeight) / 2 + 1;
+        ctx.text(Minecraft.getInstance().font,
+                Component.literal(option.getName()),
                 getX() + 24, textY, 0xFFFFFFFF);
 
         int btnY = getY() + (getHeight() - 20) / 2;
@@ -72,14 +72,14 @@ public class OptionEntry extends ListEntry {
         upBtn.active = index > 0;
         downBtn.active = index < group.getOptions().size() - 1;
 
-        upBtn.render(ctx, mouseX, mouseY, tickProgress);
-        downBtn.render(ctx, mouseX, mouseY, tickProgress);
-        editBtn.render(ctx, mouseX, mouseY, tickProgress);
-        deleteBtn.render(ctx, mouseX, mouseY, tickProgress);
+        upBtn.extractRenderState(ctx, mouseX, mouseY, tickProgress);
+        downBtn.extractRenderState(ctx, mouseX, mouseY, tickProgress);
+        editBtn.extractRenderState(ctx, mouseX, mouseY, tickProgress);
+        deleteBtn.extractRenderState(ctx, mouseX, mouseY, tickProgress);
     }
 
     @Override
-    public boolean mouseClicked(Click click, boolean doubled) {
+    public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
         if (upBtn.mouseClicked(click, doubled)) return true;
         if (downBtn.mouseClicked(click, doubled)) return true;
         if (editBtn.mouseClicked(click, doubled)) return true;
@@ -93,7 +93,7 @@ public class OptionEntry extends ListEntry {
     }
 
     @Override
-    public boolean mouseReleased(Click click) {
+    public boolean mouseReleased(MouseButtonEvent click) {
         editBtn.mouseReleased(click);
         deleteBtn.mouseReleased(click);
         return true;

@@ -1,8 +1,12 @@
 package tech.blastmc.radial.util;
 
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.mojang.authlib.GameProfile;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -112,7 +116,7 @@ public final class SkinService {
                                 else gp.properties().put("textures", new com.mojang.authlib.properties.Property("textures", value));
 
                                 // Update cache on MC thread for safety
-                                MinecraftClient.getInstance().execute(() -> {
+                                Minecraft.getInstance().execute(() -> {
                                     // Guard latest-wins again before committing
                                     if (!stale(key, gen)) {
                                         byName.put(key, gp);

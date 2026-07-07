@@ -1,8 +1,8 @@
 package tech.blastmc.radial.mixin;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.option.KeyBinding;
+import net.minecraft.client.KeyMapping;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.screens.Screen;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -12,22 +12,22 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import tech.blastmc.radial.config.screen.widget.EnumDropdownWidget;
 import tech.blastmc.radial.screen.InGameControlsEnabledScreen;
 
-@Mixin(MinecraftClient.class)
+@Mixin(Gui.class)
 public class MinecraftClientMixin {
 
     @Shadow
-    public Screen currentScreen;
+    public Screen screen;
 
     @Redirect(
             method = "setScreen",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/client/option/KeyBinding;unpressAll()V"
+                    target = "Lnet/minecraft/client/KeyMapping;releaseAll()V"
             )
     )
     private void skipUnpressForEnabledControls() {
-        if (!(currentScreen instanceof InGameControlsEnabledScreen)) {
-            KeyBinding.unpressAll();
+        if (!(screen instanceof InGameControlsEnabledScreen)) {
+            KeyMapping.releaseAll();
         }
     }
 

@@ -1,12 +1,12 @@
 package tech.blastmc.radial;
 
+import com.mojang.blaze3d.platform.Window;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.util.Window;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
 import tech.blastmc.radial.config.screen.RadialGroupsScreen;
 import tech.blastmc.radial.macros.RadialGroup;
@@ -15,32 +15,37 @@ import tech.blastmc.radial.macros.db.Database;
 import tech.blastmc.radial.screen.RadialMenuScreen;
 import tech.blastmc.radial.util.KeyboardUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class InputHandler {
 
     public static final int DEFAULT_KEY = GLFW.GLFW_KEY_U;
-    public static KeyBinding OPEN_CONFIG;
+    public static KeyMapping OPEN_CONFIG;
 
     private static final Map<Integer, Boolean> wasDown = new HashMap<>();
     private static final Set<Integer> latched = new HashSet<>();
     private static Integer lastTriggeredCode = null;
 
-    private static final Text ZERO_OPTIONS_MESSAGE = Text.literal("There are currently no commands in this group. " +
-            "You can add some in the config screen.").formatted(Formatting.RED);
+    private static final Component ZERO_OPTIONS_MESSAGE = Component.literal("There are currently no commands in this group. " +
+            "You can add some in the config screen.").withStyle(ChatFormatting.RED);
 
     static void init() {
-        OPEN_CONFIG = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+        OPEN_CONFIG = KeyMappingHelper.registerKeyMapping(new KeyMapping(
                 "key.radialmacros.openconfig",
                 DEFAULT_KEY,
-                KeyBinding.Category.create(RadialMacros.id("radialmacros.mod.name"))
+                KeyMapping.Category.register(RadialMacros.id("radialmacros.mod.name"))
         ));
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (client.player == null) return;
 
-            if (OPEN_CONFIG.wasPressed()) {
-                client.setScreen(new RadialGroupsScreen(null));
+            if (OPEN_CONFIG.consumeClick()) {
+                client.gui.setScreen(new RadialGroupsScreen(null));
                 return;
             }
 
@@ -48,14 +53,14 @@ public class InputHandler {
         });
     }
 
-    public static void pollGroupKeys(MinecraftClient client) {
+    public static void pollGroupKeys(Minecraft client) {
         Window window = client.getWindow();
 
-        if (client.currentScreen instanceof RadialMenuScreen) {
+        if (client.gui.screen() instanceof RadialMenuScreen) {
             updateReleases(window);
             return;
         }
-        if (client.currentScreen != null)
+        if (client.gui.screen() != null)
             return;
 
         for (RadialGroup group : Database.getGroups()) {
@@ -72,11 +77,11 @@ public class InputHandler {
                 List<RadialOption> options = group.getOptions().stream().filter(RadialOption::isVisible).toList();
 
                 if (options.isEmpty())
-                    client.inGameHud.getChatHud().addMessage(ZERO_OPTIONS_MESSAGE);
+                    client.gui.hud.getChat().addClientSystemMessage(ZERO_OPTIONS_MESSAGE);
                 else if (options.size() == 1)
                     options.getFirst().run();
                 else
-                    client.setScreen(new RadialMenuScreen(options, KeyboardUtils.toKey(code)));
+                    client.gui.setScreen(new RadialMenuScreen(options, KeyboardUtils.toKey(code)));
                 return;
             }
         }

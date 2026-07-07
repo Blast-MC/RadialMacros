@@ -1,19 +1,19 @@
 package tech.blastmc.radial.config.screen.list;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
-import net.minecraft.client.gui.widget.EntryListWidget;
-import net.minecraft.client.input.CharInput;
-import net.minecraft.client.input.KeyInput;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.AbstractSelectionList;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import tech.blastmc.radial.config.screen.list.entry.DetailsEntries.ConditionalRuleEntry;
 import tech.blastmc.radial.config.screen.list.entry.DetailsEntries.IconMiscOptionsEntry;
 import tech.blastmc.radial.config.screen.list.entry.HasTextFieldEntry;
 import tech.blastmc.radial.config.screen.list.entry.ListEntry;
 
-public abstract class HalfWidthList extends EntryListWidget<ListEntry> {
+public abstract class HalfWidthList extends AbstractSelectionList<ListEntry> {
 
-    public HalfWidthList(MinecraftClient mc, int width, int height, int top, int itemHeight) {
+    public HalfWidthList(Minecraft mc, int width, int height, int top, int itemHeight) {
         super(mc, width, height, top, itemHeight);
     }
 
@@ -21,10 +21,10 @@ public abstract class HalfWidthList extends EntryListWidget<ListEntry> {
     public int getRowWidth() { return width - 24; }
 
     @Override
-    protected void appendClickableNarrations(NarrationMessageBuilder builder) { }
+    protected void updateWidgetNarration(NarrationElementOutput builder) { }
 
     @Override
-    public boolean mouseClicked(Click click, boolean doubled) {
+    public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
         for (ListEntry entry : children()) {
             if (entry instanceof HasTextFieldEntry hasTextFieldEntry)
                 hasTextFieldEntry.textField.setFocused(false);
@@ -43,7 +43,7 @@ public abstract class HalfWidthList extends EntryListWidget<ListEntry> {
     }
 
     @Override
-    public boolean mouseReleased(Click click) {
+    public boolean mouseReleased(MouseButtonEvent click) {
         for (ListEntry entry : children())
             if (entry.mouseReleased(click)) return true;
         return super.mouseReleased(click);
@@ -57,21 +57,21 @@ public abstract class HalfWidthList extends EntryListWidget<ListEntry> {
     }
 
     @Override
-    public boolean keyPressed(KeyInput keyInput) {
+    public boolean keyPressed(KeyEvent keyInput) {
         for (ListEntry entry : children())
             if (entry.keyPressed(keyInput)) return true;
         return super.keyPressed(keyInput);
     }
 
     @Override
-    public boolean keyReleased(KeyInput keyInput) {
+    public boolean keyReleased(KeyEvent keyInput) {
         for (ListEntry entry : children())
             if (entry.keyReleased(keyInput)) return true;
         return super.keyReleased(keyInput);
     }
 
     @Override
-    public boolean charTyped(CharInput input) {
+    public boolean charTyped(CharacterEvent input) {
         for (ListEntry entry : children())
             if (entry.charTyped(input)) return true;
         return super.charTyped(input);
@@ -86,23 +86,23 @@ public abstract class HalfWidthList extends EntryListWidget<ListEntry> {
 
     public static class DetailsList extends HalfWidthList {
 
-        public DetailsList(MinecraftClient mc, int width, int height, int top, int itemHeight) {
+        public DetailsList(Minecraft mc, int width, int height, int top, int itemHeight) {
             super(mc, width, height, top, itemHeight);
         }
 
         @Override
-        protected int getScrollbarX() { return 0; }
+        protected int scrollBarX() { return 0; }
 
     }
 
     public static class CommandList extends HalfWidthList {
 
-        public CommandList(MinecraftClient mc, int width, int height, int top, int itemHeight) {
+        public CommandList(Minecraft mc, int width, int height, int top, int itemHeight) {
             super(mc, width, height, top, itemHeight);
         }
 
         @Override
-        protected int getScrollbarX() { return width * 2 - 6; }
+        protected int scrollBarX() { return width * 2 - 6; }
 
     }
 

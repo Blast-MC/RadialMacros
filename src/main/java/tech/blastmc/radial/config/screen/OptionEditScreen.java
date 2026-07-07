@@ -1,21 +1,29 @@
 package tech.blastmc.radial.config.screen;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.input.CharInput;
-import net.minecraft.client.input.KeyInput;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import tech.blastmc.radial.config.screen.list.HalfWidthList;
 import tech.blastmc.radial.config.screen.list.HalfWidthList.CommandList;
 import tech.blastmc.radial.config.screen.list.HalfWidthList.DetailsList;
 import tech.blastmc.radial.config.screen.list.entry.AddEntryEntry;
 import tech.blastmc.radial.config.screen.list.entry.CommandEntry;
-import tech.blastmc.radial.config.screen.list.entry.DetailsEntries.*;
+import tech.blastmc.radial.config.screen.list.entry.DetailsEntries.ConditionalRuleEntry;
+import tech.blastmc.radial.config.screen.list.entry.DetailsEntries.DetailsLabelEntry;
+import tech.blastmc.radial.config.screen.list.entry.DetailsEntries.DetailsNameEntry;
+import tech.blastmc.radial.config.screen.list.entry.DetailsEntries.IconEntry;
+import tech.blastmc.radial.config.screen.list.entry.DetailsEntries.IconMiscOptionsEntry;
+import tech.blastmc.radial.config.screen.list.entry.DetailsEntries.ItemModelEntry;
+import tech.blastmc.radial.config.screen.list.entry.DetailsEntries.MaterialEntry;
+import tech.blastmc.radial.config.screen.list.entry.DetailsEntries.VisibilityLabelEntry;
+import tech.blastmc.radial.config.screen.list.entry.DetailsEntries.VisibilityModeEntry;
 import tech.blastmc.radial.macros.RadialGroup;
 import tech.blastmc.radial.macros.RadialOption;
 import tech.blastmc.radial.macros.condition.ConditionalConfig;
@@ -33,35 +41,37 @@ public class OptionEditScreen extends Screen {
     private static final int TOP_BAR_H = 28;
     private static final int BOTTOM_BAR_H = 28;
 
-    public ButtonWidget doneButton;
+    public Button doneButton;
     public HalfWidthList commandsList;
     public HalfWidthList detailsList;
 
     public OptionEditScreen(Screen parent, RadialGroup group, int index) {
-        super(Text.literal("RadialMacros - Option Edit"));
+        super(Component.literal("RadialMacros - Option Edit"));
         this.parent = parent;
         this.index = index;
         this.group = group;
 
-        if (this.index == -1)
+        if (this.index == -1) {
             this.option = new RadialOption(group, "Macro", new ItemStack(Items.GRASS_BLOCK), new ArrayList<>());
+            this.option.setEnabled(true);
+        }
         else
             this.option = group.getOptions().get(index).clone();
     }
 
     @Override
     protected void init() {
-        doneButton = addDrawableChild(ButtonWidget.builder(Text.literal("Done"), b -> {
+        doneButton = addRenderableWidget(Button.builder(Component.literal("Done"), b -> {
                     commit();
-                    close();
+                    onClose();
                 })
-                .dimensions(this.width / 2 - 100, this.height - 24, 200, 20).build());
+                .bounds(this.width / 2 - 100, this.height - 24, 200, 20).build());
 
-        detailsList = addDrawableChild(new DetailsList(this.client, width / 2 + 1, height - TOP_BAR_H - BOTTOM_BAR_H, TOP_BAR_H, 28));
+        detailsList = addRenderableWidget(new DetailsList(this.minecraft, width / 2 + 1, height - TOP_BAR_H - BOTTOM_BAR_H, TOP_BAR_H, 28));
         detailsList.setPosition(0, TOP_BAR_H);
         buildDetailsList();
 
-        commandsList = addDrawableChild(new CommandList(this.client, width / 2, height - TOP_BAR_H - BOTTOM_BAR_H, TOP_BAR_H, 28));
+        commandsList = addRenderableWidget(new CommandList(this.minecraft, width / 2, height - TOP_BAR_H - BOTTOM_BAR_H, TOP_BAR_H, 28));
         commandsList.setPosition(width / 2 + 1, TOP_BAR_H);
         buildCommandList();
     }
@@ -91,17 +101,17 @@ public class OptionEditScreen extends Screen {
     }
 
     private void refreshDetails() {
-        double scroll = commandsList.getScrollY();
-        MinecraftClient.getInstance().setScreen(this);
-        detailsList.setScrollY(detailsList.getMaxScrollY());
-        commandsList.setScrollY(scroll);
+        double scroll = commandsList.scrollAmount();
+        Minecraft.getInstance().gui.setScreen(this);
+        detailsList.setScrollAmount(detailsList.maxScrollAmount());
+        commandsList.setScrollAmount(scroll);
     }
 
     private void refreshCommands() {
-        double scroll = detailsList.getScrollY();
-        MinecraftClient.getInstance().setScreen(this);
-        commandsList.setScrollY(commandsList.getMaxScrollY());
-        detailsList.setScrollY(scroll);
+        double scroll = detailsList.scrollAmount();
+        Minecraft.getInstance().gui.setScreen(this);
+        commandsList.setScrollAmount(commandsList.maxScrollAmount());
+        detailsList.setScrollAmount(scroll);
     }
 
     private void buildCommandList() {
@@ -122,14 +132,14 @@ public class OptionEditScreen extends Screen {
     }
 
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float deltaTicks) {
-        context.drawCenteredTextWithShadow(textRenderer, "Edit Macro", width / 2, 28 / 2 - textRenderer.fontHeight / 2, 0xFFFFFFFF);
-        super.render(context, mouseX, mouseY, deltaTicks);
+    public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float deltaTicks) {
+        context.centeredText(font, "Edit Macro", width / 2, 28 / 2 - font.lineHeight / 2, 0xFFFFFFFF);
+        super.extractRenderState(context, mouseX, mouseY, deltaTicks);
     }
 
     @Override
-    public void close() {
-        this.client.setScreen(parent);
+    public void onClose() {
+        this.minecraft.gui.setScreen(parent);
     }
 
     @Override
@@ -141,7 +151,7 @@ public class OptionEditScreen extends Screen {
     }
 
     @Override
-    public boolean mouseClicked(Click click, boolean doubled) {
+    public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
         if (doneButton.mouseClicked(click, doubled)) return true;
         detailsList.mouseClicked(click, doubled);
         commandsList.mouseClicked(click, doubled);
@@ -149,7 +159,7 @@ public class OptionEditScreen extends Screen {
     }
 
     @Override
-    public boolean mouseReleased(Click click) {
+    public boolean mouseReleased(MouseButtonEvent click) {
         if (doneButton.mouseReleased(click)) return true;
         if (detailsList.mouseReleased(click)) return true;
         if (commandsList.mouseReleased(click)) return true;
@@ -157,21 +167,21 @@ public class OptionEditScreen extends Screen {
     }
 
     @Override
-    public boolean keyPressed(KeyInput keyInput) {
+    public boolean keyPressed(KeyEvent keyInput) {
         if (detailsList.keyPressed(keyInput)) return true;
         if (commandsList.keyPressed(keyInput)) return true;
         return super.keyPressed(keyInput);
     }
 
     @Override
-    public boolean keyReleased(KeyInput keyInput) {
+    public boolean keyReleased(KeyEvent keyInput) {
         if (detailsList.keyReleased(keyInput)) return true;
         if (commandsList.keyReleased(keyInput)) return true;
         return false;
     }
 
     @Override
-    public boolean charTyped(CharInput input) {
+    public boolean charTyped(CharacterEvent input) {
         if (detailsList.charTyped(input)) return true;
         if (commandsList.charTyped(input)) return true;
         return super.charTyped(input);

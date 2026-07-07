@@ -1,13 +1,13 @@
 package tech.blastmc.radial.config.screen.list.entry;
 
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.input.CharInput;
-import net.minecraft.client.input.KeyInput;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 
 public abstract class HasTextFieldEntry extends ListEntry {
 
-    public TextFieldWidget textField;
+    public EditBox textField;
 
     @Override
     public void mouseMoved(double mouseX, double mouseY) {
@@ -15,7 +15,7 @@ public abstract class HasTextFieldEntry extends ListEntry {
     }
 
     @Override
-    public boolean mouseClicked(Click click, boolean doubled) {
+    public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
         if (textField.mouseClicked(click, doubled)) {
             textField.setFocused(true);
             return true;
@@ -26,25 +26,25 @@ public abstract class HasTextFieldEntry extends ListEntry {
     }
 
     @Override
-    public boolean mouseReleased(Click click) {
+    public boolean mouseReleased(MouseButtonEvent click) {
         textField.mouseReleased(click);
         return super.mouseReleased(click);
     }
 
     @Override
-    public boolean keyPressed(KeyInput keyInput) {
+    public boolean keyPressed(KeyEvent keyInput) {
         if (textField.keyPressed(keyInput)) return true;
         return super.keyPressed(keyInput);
     }
 
     @Override
-    public boolean keyReleased(KeyInput keyInput) {
+    public boolean keyReleased(KeyEvent keyInput) {
         if (textField.keyReleased(keyInput)) return true;
         return super.keyReleased(keyInput);
     }
 
     @Override
-    public boolean charTyped(CharInput input) {
+    public boolean charTyped(CharacterEvent input) {
         if (textField.charTyped(input)) return true;
         return super.charTyped(input);
     }

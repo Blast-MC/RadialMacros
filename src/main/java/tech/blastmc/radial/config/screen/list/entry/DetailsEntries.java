@@ -1,14 +1,14 @@
 package tech.blastmc.radial.config.screen.list.entry;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.tooltip.Tooltip;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.input.CharInput;
-import net.minecraft.client.input.KeyInput;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.Util;
 import tech.blastmc.radial.config.screen.widget.EnumDropdownWidget;
 import tech.blastmc.radial.config.screen.widget.ToggleSwitchWidget;
@@ -25,14 +25,14 @@ public class DetailsEntries {
     public static class DetailsLabelEntry extends ListEntry implements CustomHeightEntry {
 
         @Override
-        public void render(DrawContext context, int mouseX, int mouseY, boolean hovered, float tickProgress) {
-            context.drawCenteredTextWithShadow(MinecraftClient.getInstance().textRenderer, "Display Settings",
-                    getX() + getWidth() / 2, 2 + (getY() + getHeight() / 2) - MinecraftClient.getInstance().textRenderer.fontHeight / 2, 0xFFFFFFFF);
+        public void extractContent(GuiGraphicsExtractor context, int mouseX, int mouseY, boolean hovered, float tickProgress) {
+            context.centeredText(Minecraft.getInstance().font, "Display Settings",
+                    getX() + getWidth() / 2, 2 + (getY() + getItemHeight() / 2) - Minecraft.getInstance().font.lineHeight / 2, 0xFFFFFFFF);
         }
 
         @Override
         public int getItemHeight() {
-            return  MinecraftClient.getInstance().textRenderer.fontHeight + 4;
+            return  Minecraft.getInstance().font.lineHeight + 4;
         }
     }
 
@@ -41,7 +41,7 @@ public class DetailsEntries {
         ToggleSwitchWidget toggleButton;
 
         public DetailsNameEntry(RadialOption option) {
-            this.textField = ScreenUtils.createTextField(MinecraftClient.getInstance().textRenderer, 100, 20, option.getName(), "Name", option::setName);
+            this.textField = ScreenUtils.createTextField(Minecraft.getInstance().font, 100, 20, option.getName(), "Name", option::setName);
             this.textField.setMaxLength(32);
 
             this.toggleButton = new ToggleSwitchWidget(0, 0, 40, 20, option.isEnabled());
@@ -50,13 +50,13 @@ public class DetailsEntries {
         }
 
         @Override
-        public void render(DrawContext context, int mouseX, int mouseY, boolean hovered, float tickProgress) {
+        public void extractContent(GuiGraphicsExtractor context, int mouseX, int mouseY, boolean hovered, float tickProgress) {
             textField.setWidth(getWidth() - 42);
             textField.setPosition(getX(), getY() + 2);
-            textField.render(context, mouseX, mouseY, tickProgress);
+            textField.extractRenderState(context, mouseX, mouseY, tickProgress);
 
             toggleButton.setPosition(getX() + getWidth() - 40, getY() + 2);
-            toggleButton.render(context, mouseX, mouseY, tickProgress);
+            toggleButton.extractRenderState(context, mouseX, mouseY, tickProgress);
         }
 
         @Override
@@ -65,7 +65,7 @@ public class DetailsEntries {
         }
 
         @Override
-        public boolean mouseClicked(Click click, boolean doubled) {
+        public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
             if (toggleButton.mouseClicked(click, doubled)) return true;
             return super.mouseClicked(click, doubled);
         }
@@ -80,11 +80,11 @@ public class DetailsEntries {
         }
 
         @Override
-        public void render(DrawContext context, int mouseX, int mouseY, boolean hovered, float tickProgress) {
-            context.drawTextWithShadow(MinecraftClient.getInstance().textRenderer, "Icon",
-                    getX(), getY() + getHeight() - MinecraftClient.getInstance().textRenderer.fontHeight / 2,  0xFFFFFFFF);
+        public void extractContent(GuiGraphicsExtractor context, int mouseX, int mouseY, boolean hovered, float tickProgress) {
+            context.text(Minecraft.getInstance().font, "Icon",
+                    getX(), getY() + getItemHeight() - Minecraft.getInstance().font.lineHeight / 2,  0xFFFFFFFF);
 
-            context.drawItem(option.getIcon(), getX() + getWidth() - 16, getY() + getHeight() - 10);
+            context.item(option.getIcon(), getX() + getWidth() - 16, getY() + getItemHeight() - 10);
         }
 
         @Override
@@ -96,7 +96,7 @@ public class DetailsEntries {
     public static class MaterialEntry extends HasTextFieldEntry implements CustomHeightEntry {
 
         public MaterialEntry(RadialOption option) {
-            textField = ScreenUtils.createTextField(MinecraftClient.getInstance().textRenderer, 100, 20, option.getMaterial(), "Material", input -> {
+            textField = ScreenUtils.createTextField(Minecraft.getInstance().font, 100, 20, option.getMaterial(), "Material", input -> {
                 if (input.equals(option.getMaterial()))
                     return;
                 option.setMaterial(input);
@@ -106,10 +106,10 @@ public class DetailsEntries {
         }
 
         @Override
-        public void render(DrawContext context, int mouseX, int mouseY, boolean hovered, float tickProgress) {
+        public void extractContent(GuiGraphicsExtractor context, int mouseX, int mouseY, boolean hovered, float tickProgress) {
             textField.setWidth(getWidth());
             textField.setPosition(getX(), getY() + 4);
-            textField.render(context, mouseX, mouseY, tickProgress);
+            textField.extractRenderState(context, mouseX, mouseY, tickProgress);
         }
 
         @Override
@@ -121,7 +121,7 @@ public class DetailsEntries {
     public static class ItemModelEntry extends HasTextFieldEntry implements CustomHeightEntry {
 
         public ItemModelEntry(RadialOption option) {
-            textField = ScreenUtils.createTextField(MinecraftClient.getInstance().textRenderer, 100, 20,
+            textField = ScreenUtils.createTextField(Minecraft.getInstance().font, 100, 20,
                     option.getItemModel(), "Item Model", "This is the 'item_model' component, which allows for custom items (optional)", input -> {
                         if (input.equals(option.getItemModel()))
                             return;
@@ -132,10 +132,10 @@ public class DetailsEntries {
         }
 
         @Override
-        public void render(DrawContext context, int mouseX, int mouseY, boolean hovered, float tickProgress) {
+        public void extractContent(GuiGraphicsExtractor context, int mouseX, int mouseY, boolean hovered, float tickProgress) {
             textField.setWidth(getWidth());
             textField.setPosition(getX(), getY() + 4);
-            textField.render(context, mouseX, mouseY, tickProgress);
+            textField.extractRenderState(context, mouseX, mouseY, tickProgress);
         }
 
         @Override
@@ -147,20 +147,20 @@ public class DetailsEntries {
     public static class IconMiscOptionsEntry extends HasTextFieldEntry implements CustomHeightEntry {
 
         private final RadialOption option;
-        public TextFieldWidget textField2;
-        private ButtonWidget enchantedButton;
+        public EditBox textField2;
+        private Button enchantedButton;
 
         public IconMiscOptionsEntry(RadialOption option) {
             this.option = option;
 
-            enchantedButton = ButtonWidget.builder(Text.literal("Enchanted: Off"),
+            enchantedButton = Button.builder(Component.literal("Enchanted: Off"),
                             b -> {
                                 option.setEnchanted(!option.isEnchanted());
                                 option.clearCachedIcon();
                             })
-                    .dimensions(0, 0, 100, 20).build();
+                    .bounds(0, 0, 100, 20).build();
 
-            textField = ScreenUtils.createTextField(MinecraftClient.getInstance().textRenderer, 100, 20,
+            textField = ScreenUtils.createTextField(Minecraft.getInstance().font, 100, 20,
                     option.getSkullOwner(), "Skull Owner", input -> {
                         if (input.equals(option.getSkullOwner()))
                             return;
@@ -168,7 +168,7 @@ public class DetailsEntries {
                     });
             textField.setMaxLength(16);
 
-            textField2 = ScreenUtils.createTextField(MinecraftClient.getInstance().textRenderer, 100, 20,
+            textField2 = ScreenUtils.createTextField(Minecraft.getInstance().font, 100, 20,
                     option.getRgb(), "Dye Color", "The RGB value of the color (255,255,255)",input -> {
                         if (input.equals(option.getRgb()))
                             return;
@@ -179,7 +179,7 @@ public class DetailsEntries {
         }
 
         @Override
-        public void render(DrawContext context, int mouseX, int mouseY, boolean hovered, float tickProgress) {
+        public void extractContent(GuiGraphicsExtractor context, int mouseX, int mouseY, boolean hovered, float tickProgress) {
             enchantedButton.setWidth(getWidth() / 2 - 1);
             textField.setWidth(getWidth() / 2 - 1);
             textField2.setWidth(getWidth() / 2 - 1);
@@ -188,27 +188,27 @@ public class DetailsEntries {
 
             if (option.getMaterial().endsWith("player_head")) {
                 textField.visible = true;
-                textField.setFocusUnlocked(true);
+                textField.setCanLoseFocus(true);
                 textField.setPosition(getX(), getY() + 2);
                 enchantedButton.setPosition(0, 0);
-                if (!option.isSkullOwnerProcessed() && Util.getMeasuringTimeMs() - option.getSkullOwnerLastUpdate() > 200) {
+                if (!option.isSkullOwnerProcessed() && Util.getMillis() - option.getSkullOwnerLastUpdate() > 200) {
                     option.setSkullOwnerProcessed(true);
                     option.clearCachedIcon();
                 }
-                textField.render(context, mouseX, mouseY, tickProgress);
+                textField.extractRenderState(context, mouseX, mouseY, tickProgress);
             }
             else {
                 textField.visible = false;
                 textField.setFocused(false);
-                textField.setFocusUnlocked(false);
+                textField.setCanLoseFocus(false);
                 textField.setPosition(0, 0);
                 enchantedButton.setPosition(getX(), getY() + 2);
-                enchantedButton.setMessage(option.isEnchanted() ? Text.literal("Enchanted: On") : Text.literal("Enchanted: Off"));
-                enchantedButton.render(context, mouseX, mouseY, tickProgress);
+                enchantedButton.setMessage(option.isEnchanted() ? Component.literal("Enchanted: On") : Component.literal("Enchanted: Off"));
+                enchantedButton.extractRenderState(context, mouseX, mouseY, tickProgress);
             }
 
             if (option.isDyeable())
-                textField2.render(context, mouseX, mouseY, tickProgress);
+                textField2.extractRenderState(context, mouseX, mouseY, tickProgress);
         }
 
         @Override
@@ -217,7 +217,7 @@ public class DetailsEntries {
         }
 
         @Override
-        public boolean mouseClicked(Click click, boolean doubled) {
+        public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
             if (enchantedButton.mouseClicked(click, doubled))
                 return true;
             if (textField.mouseClicked(click, doubled)) {
@@ -238,7 +238,7 @@ public class DetailsEntries {
         }
 
         @Override
-        public boolean mouseReleased(Click click) {
+        public boolean mouseReleased(MouseButtonEvent click) {
             enchantedButton.mouseReleased(click);
             textField.mouseReleased(click);
             textField2.mouseReleased(click);
@@ -246,21 +246,21 @@ public class DetailsEntries {
         }
 
         @Override
-        public boolean keyPressed(KeyInput keyInput) {
+        public boolean keyPressed(KeyEvent keyInput) {
             if (textField.keyPressed(keyInput)) return true;
             if (textField2.keyPressed(keyInput)) return true;
             return super.keyPressed(keyInput);
         }
 
         @Override
-        public boolean keyReleased(KeyInput keyInput) {
+        public boolean keyReleased(KeyEvent keyInput) {
             if (textField.keyReleased(keyInput)) return true;
             if (textField2.keyReleased(keyInput)) return true;
             return super.keyReleased(keyInput);
         }
 
         @Override
-        public boolean charTyped(CharInput input) {
+        public boolean charTyped(CharacterEvent input) {
             if (textField.charTyped(input)) return true;
             if (textField2.charTyped(input)) return true;
             return super.charTyped(input);
@@ -271,9 +271,9 @@ public class DetailsEntries {
     public static class VisibilityLabelEntry extends ListEntry implements CustomHeightEntry {
 
         @Override
-        public void render(DrawContext context, int mouseX, int mouseY, boolean hovered, float tickProgress) {
-            context.drawTextWithShadow(MinecraftClient.getInstance().textRenderer, "Visibility",
-                    getX(), getY() + getHeight() - MinecraftClient.getInstance().textRenderer.fontHeight / 2,  0xFFFFFFFF);
+        public void extractContent(GuiGraphicsExtractor context, int mouseX, int mouseY, boolean hovered, float tickProgress) {
+            context.text(Minecraft.getInstance().font, "Visibility",
+                    getX(), getY() + getItemHeight() - Minecraft.getInstance().font.lineHeight / 2,  0xFFFFFFFF);
         }
 
         @Override
@@ -284,13 +284,13 @@ public class DetailsEntries {
 
     public static class VisibilityModeEntry extends ListEntry implements CustomHeightEntry {
 
-        private ButtonWidget button;
+        private Button button;
 
         public VisibilityModeEntry(RadialOption option, Runnable rebuildCallback) {
-            this.button = ButtonWidget.builder(
-                    Text.literal(option.isConditional() ? "Mode: Conditional" : "Mode: Always"), button -> {
+            this.button = Button.builder(
+                    Component.literal(option.isConditional() ? "Mode: Conditional" : "Mode: Always"), button -> {
                         option.setConditional(!option.isConditional());
-                        button.setMessage(Text.literal(option.isConditional() ? "Mode: Conditional" : "Mode: Always"));
+                        button.setMessage(Component.literal(option.isConditional() ? "Mode: Conditional" : "Mode: Always"));
 
                         if (option.isConditional())
                             option.setRules(new ArrayList<>() {{
@@ -305,14 +305,14 @@ public class DetailsEntries {
         }
 
         @Override
-        public void render(DrawContext context, int mouseX, int mouseY, boolean hovered, float tickProgress) {
+        public void extractContent(GuiGraphicsExtractor context, int mouseX, int mouseY, boolean hovered, float tickProgress) {
             button.setWidth(getWidth());
             button.setPosition(getX(), getY() + 4);
-            button.render(context, mouseX, mouseY, tickProgress);
+            button.extractRenderState(context, mouseX, mouseY, tickProgress);
         }
 
         @Override
-        public boolean mouseClicked(Click click, boolean doubled) {
+        public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
             return this.button.mouseClicked(click, doubled);
         }
 
@@ -327,7 +327,7 @@ public class DetailsEntries {
         private final RadialOption option;
         private final int id;
         public final EnumDropdownWidget<ConditionalityRule> widget;
-        private final ButtonWidget deleteButton;
+        private final Button deleteButton;
 
         public ConditionalRuleEntry(int id, RadialOption option, Runnable rebuildCallback) {
             this.option = option;
@@ -335,9 +335,9 @@ public class DetailsEntries {
 
             ConditionalConfig config = option.getRules().get(id);
 
-            this.textField = ScreenUtils.createTextField(MinecraftClient.getInstance().textRenderer, 100, 20,
+            this.textField = ScreenUtils.createTextField(Minecraft.getInstance().font, 100, 20,
                     config.getValue() == null ? "" : config.getValue(), "Value", config::setValue);
-            this.textField.setTooltip(Tooltip.of(Text.literal("Use a comma (,) to separate multiple values")));
+            this.textField.setTooltip(Tooltip.create(Component.literal("Use a comma (,) to separate multiple values")));
             this.textField.setTooltipDelay(Duration.ofMillis(250));
 
             this.widget = new EnumDropdownWidget<>("conditional-rule-" + id,0, 0, 100, 20, config.getType(), ConditionalityRule::getDisplay);
@@ -346,36 +346,36 @@ public class DetailsEntries {
                 if (oldRule.getType() == null || !oldRule.getType().equals(rule.getType())) {
                     System.out.println("Clearing value");
                     config.setValue(null);
-                    this.textField.setText("");
+                    this.textField.setValue("");
                 }
                 config.setType(rule);
             });
-            this.deleteButton = ButtonWidget.builder(Text.literal("✕"), button -> {
+            this.deleteButton = Button.builder(Component.literal("✕"), button -> {
                 option.getRules().remove(id);
                 if (option.getRules().isEmpty())
                     option.getRules().add(new ConditionalConfig(ConditionalityRule.IS_MULTIPLAYER, null));
 
                 rebuildCallback.run();
-            }).dimensions(0, 0, 20, 20).build();
+            }).bounds(0, 0, 20, 20).build();
         }
 
         @Override
-        public void render(DrawContext context, int mouseX, int mouseY, boolean hovered, float tickProgress) {
+        public void extractContent(GuiGraphicsExtractor context, int mouseX, int mouseY, boolean hovered, float tickProgress) {
             this.textField.setWidth(getWidth() / 2 - 2 - 20);
             this.textField.setPosition(getX()  + (getWidth() / 2) + 1, getY() + 4);
             if (option.getRules().get(id).getType().hasValue())
-                this.textField.render(context, mouseX, mouseY, tickProgress);
+                this.textField.extractRenderState(context, mouseX, mouseY, tickProgress);
 
             this.deleteButton.setPosition(getX() + getWidth() - 20, getY() + 4);
-            this.deleteButton.render(context, mouseX, mouseY, tickProgress);
+            this.deleteButton.extractRenderState(context, mouseX, mouseY, tickProgress);
 
             this.widget.setPosition(getX(), getY() + 4);
-            this.widget.setDimensions(getWidth() / 2 - 1, 20);
-            this.widget.render(context, mouseX, mouseY, tickProgress);
+            this.widget.setSize(getWidth() / 2 - 1, 20);
+            this.widget.extractRenderState(context, mouseX, mouseY, tickProgress);
         }
 
         @Override
-        public boolean mouseClicked(Click click, boolean doubled) {
+        public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
             if (this.widget.mouseClicked(click, doubled)) return true;
             if (this.deleteButton.mouseClicked(click, doubled)) return true;
             return super.mouseClicked(click, doubled);
@@ -402,7 +402,7 @@ public class DetailsEntries {
         }
 
         @Override
-        public void render(DrawContext context, int mouseX, int mouseY, boolean hovered, float tickProgress) {}
+        public void extractContent(GuiGraphicsExtractor context, int mouseX, int mouseY, boolean hovered, float tickProgress) {}
 
         @Override
         public int getItemHeight() {

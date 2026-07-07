@@ -2,9 +2,9 @@ package tech.blastmc.radial.mixin;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.widget.EntryListWidget;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.AbstractSelectionList;
+import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -23,20 +23,23 @@ import java.util.List;
  * Any entry that implements CustomHeightEntry will use its own height; others use the widget's itemHeight.
  */
 @Environment(EnvType.CLIENT)
-@Mixin(EntryListWidget.class)
-public abstract class EntryListWidgetMixin<E extends EntryListWidget.Entry<E>> {
+@Mixin(AbstractSelectionList.class)
+public abstract class EntryListWidgetMixin<E extends AbstractSelectionList.Entry<E>> {
 
-    @Shadow @Final protected int itemHeight;
+    @Shadow @Final protected int defaultEntryHeight;
 
-    @Shadow protected abstract int getRowLeft();
-    @Shadow protected abstract int getRowWidth();
-    @Shadow protected abstract int getEntryCount();
-    @Shadow protected abstract List<E> children();
-    @Shadow protected abstract void renderEntry(DrawContext context, int mouseX, int mouseY, float delta, E entry);
+    @Shadow
+    public abstract int getRowLeft();
+    @Shadow
+    public abstract int getRowWidth();
+    @Shadow protected abstract int getItemCount();
+    @Shadow
+    public abstract List<E> children();
+    @Shadow protected abstract void extractItem(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta, E entry);
 
     @Unique
     private int rm$getEntryHeightForIndex(int index) {
-        if (index < 0 || index >= getEntryCount()) return itemHeight;
+        if (index < 0 || index >= getItemCount()) return defaultEntryHeight;
         return rm$getEntryHeight(children().get(index));
     }
 
@@ -46,7 +49,7 @@ public abstract class EntryListWidgetMixin<E extends EntryListWidget.Entry<E>> {
             int h = che.getItemHeight();
             return Math.max(4, h);
         }
-        return this.itemHeight;
+        return this.defaultEntryHeight;
     }
 
     @Unique
@@ -78,9 +81,9 @@ public abstract class EntryListWidgetMixin<E extends EntryListWidget.Entry<E>> {
         return cir;
     }
 
-    @Inject(method = "getContentsHeightWithPadding", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "contentHeight", at = @At("HEAD"), cancellable = true)
     private void rm$getContentsHeightWithPadding(CallbackInfoReturnable<Integer> cir) {
-        int total = 4 + rm$getCumulativeHeightUpTo(getEntryCount());
+        int total = 4 + rm$getCumulativeHeightUpTo(getItemCount());
         cir.setReturnValue(total);
     }
 
@@ -91,14 +94,14 @@ public abstract class EntryListWidgetMixin<E extends EntryListWidget.Entry<E>> {
         int left = centerX - halfRowWidth;
         int right = centerX + halfRowWidth;
 
-        int relY = MathHelper.floor(y - (double) ((ClickableWidgetAccessor) this).rm$invokeGetY()) + (int) ((ScrollableWidgetAccessor) this).rm$invokeGetScrollY() - 4;
+        int relY = Mth.floor(y - (double) ((ClickableWidgetAccessor) this).rm$invokeGetY()) + (int) ((ScrollableWidgetAccessor) this).rm$invokeGetScrollY() - 4;
         if (x < left || x > right || relY < 0) {
             cir.setReturnValue(null);
             return;
         }
 
         int running = 0;
-        int count = this.getEntryCount();
+        int count = this.getItemCount();
         for (int i = 0; i < count; i++) {
             int h = rm$getEntryHeightForIndex(i);
             if (relY < running + h) {
@@ -110,11 +113,11 @@ public abstract class EntryListWidgetMixin<E extends EntryListWidget.Entry<E>> {
         cir.setReturnValue(null);
     }
 
-    @Inject(method = "renderList", at = @At("HEAD"), cancellable = true)
-    private void rm$renderList(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
+    @Inject(method = "extractListItems", at = @At("HEAD"), cancellable = true)
+    private void rm$renderList(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
         int rowLeft = this.getRowLeft();
         int rowWidth = this.getRowWidth();
-        int count = this.getEntryCount();
+        int count = this.getItemCount();
 
         for (int i = 0; i < count; i++) {
             int yTop = rm$getRowTopReturn(i).getReturnValue();
@@ -123,7 +126,7 @@ public abstract class EntryListWidgetMixin<E extends EntryListWidget.Entry<E>> {
             int yBottom = yTop + fullHeight;
 
             if (yBottom >= ((ClickableWidgetAccessor) this).rm$invokeGetY() && yTop <= ((ClickableWidgetAccessor) this).rm$invokeGetBottom()) {
-                this.renderEntry(context, mouseX, mouseY, delta, children().get(i));
+                this.extractItem(context, mouseX, mouseY, delta, children().get(i));
             }
         }
 

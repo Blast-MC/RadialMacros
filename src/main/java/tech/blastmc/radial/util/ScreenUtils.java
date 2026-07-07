@@ -1,10 +1,10 @@
 package tech.blastmc.radial.util;
 
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.tooltip.Tooltip;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.network.chat.Component;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -15,19 +15,20 @@ public class ScreenUtils {
 
     public static final List<Runnable> LAST_RENDERS = new ArrayList<>();
 
-    public static TextFieldWidget createTextField(TextRenderer textRenderer, int width, int height, String text, String placeholder, Consumer<String> onChangeLister) {
+    public static EditBox createTextField(Font textRenderer, int width, int height, String text, String placeholder, Consumer<String> onChangeLister) {
         return ScreenUtils.createTextField(textRenderer, width, height, text, placeholder, null, onChangeLister);
     }
 
-    public static TextFieldWidget createTextField(TextRenderer textRenderer, int width, int height, String text, String placeholder, String tooltip, Consumer<String> onChangeListener) {
-        TextFieldWidget textField = new TextFieldWidget(textRenderer, width, height, Text.literal(placeholder));
-        textField.setPlaceholder(Text.literal(placeholder).formatted(Formatting.GRAY));
+    public static EditBox createTextField(Font textRenderer, int width, int height, String text, String placeholder, String tooltip, Consumer<String> onChangeListener) {
+        EditBox textField = new EditBox(textRenderer, width, height, Component.literal(placeholder));
+        textField.setHint(Component.literal(placeholder).withStyle(ChatFormatting.GRAY));
         textField.setEditable(true);
-        textField.setText(text);
-        textField.setCursorToStart(false);
-        textField.setChangedListener(onChangeListener);
+        if (text != null && !text.isEmpty())
+            textField.setValue(text);
+        textField.moveCursorToStart(false);
+        textField.setResponder(onChangeListener);
         if (tooltip != null) {
-            textField.setTooltip(Tooltip.of(Text.literal(tooltip)));
+            textField.setTooltip(Tooltip.create(Component.literal(tooltip)));
             textField.setTooltipDelay(Duration.ofMillis(250));
         }
         return textField;

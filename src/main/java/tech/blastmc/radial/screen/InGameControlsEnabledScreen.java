@@ -1,43 +1,43 @@
 package tech.blastmc.radial.screen;
 
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.input.CharInput;
-import net.minecraft.client.input.KeyInput;
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.text.Text;
+import net.minecraft.client.KeyMapping;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
 
 public class InGameControlsEnabledScreen extends Screen {
 
-    protected InGameControlsEnabledScreen(Text title) {
+    protected InGameControlsEnabledScreen(Component title) {
         super(title);
     }
 
     @Override
-    public boolean shouldPause() {
+    public boolean isPauseScreen() {
         return false;
     }
 
     @Override
     public void tick() {
-        KeyBinding.updatePressedStates();
+        KeyMapping.setAll();
     }
 
     @Override
-    public boolean keyPressed(KeyInput keyInput) {
+    public boolean keyPressed(KeyEvent keyInput) {
         if (keyInput.key() == GLFW.GLFW_KEY_ESCAPE) {
-            close();
+            onClose();
             return true;
         }
         return false;
     }
 
-    @Override public boolean keyReleased(KeyInput keyInput) { return false; }
-    @Override public boolean charTyped(CharInput input) { return false; }
+    @Override public boolean keyReleased(KeyEvent keyInput) { return false; }
+    @Override public boolean charTyped(CharacterEvent input) { return false; }
 
-    @Override public boolean mouseClicked(Click click, boolean doubled) { return true; }
-    @Override public boolean mouseReleased(Click click) { return true; }
-    @Override public boolean mouseDragged(Click click, double offsetX, double offsetY) { return true; }
+    @Override public boolean mouseClicked(MouseButtonEvent click, boolean doubled) { return true; }
+    @Override public boolean mouseReleased(MouseButtonEvent click) { return true; }
+    @Override public boolean mouseDragged(MouseButtonEvent click, double offsetX, double offsetY) { return true; }
 
 }

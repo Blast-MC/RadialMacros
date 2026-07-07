@@ -1,7 +1,7 @@
 package tech.blastmc.radial.mixin;
 
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.widget.ClickableWidget;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.AbstractWidget;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -12,19 +12,19 @@ import tech.blastmc.radial.config.screen.widget.EnumDropdownWidget;
 import tech.blastmc.radial.util.ExtraHoveredIgnored;
 import tech.blastmc.radial.util.HasId;
 
-@Mixin(ClickableWidget.class)
+@Mixin(AbstractWidget.class)
 public class ClickableWidgetMixin {
 
-    @Shadow protected boolean hovered;
+    @Shadow protected boolean isHovered;
 
-    @Inject(method = "render",
+    @Inject(method = "extractRenderState",
             at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/client/gui/widget/ClickableWidget;renderWidget(Lnet/minecraft/client/gui/DrawContext;IIF)V"))
-    void rm$render(DrawContext context, int mouseX, int mouseY, float deltaTicks, CallbackInfo ci) {
-        if (!this.hovered)
+            target = "Lnet/minecraft/client/gui/components/AbstractWidget;extractWidgetRenderState(Lnet/minecraft/client/gui/GuiGraphicsExtractor;IIF)V"))
+    void rm$render(GuiGraphicsExtractor context, int mouseX, int mouseY, float deltaTicks, CallbackInfo ci) {
+        if (!this.isHovered)
             return;
 
-        this.hovered = anyOpenDropdownWidgets();
+        this.isHovered = anyOpenDropdownWidgets();
     }
 
     @Unique

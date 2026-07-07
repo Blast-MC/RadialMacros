@@ -1,11 +1,11 @@
 package tech.blastmc.radial.screen;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.util.InputUtil;
-import net.minecraft.client.util.Window;
-import net.minecraft.text.Text;
+import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.blaze3d.platform.Window;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.Util;
 import org.joml.Matrix3x2fStack;
 import org.lwjgl.glfw.GLFW;
@@ -25,14 +25,14 @@ public class RadialMenuScreen extends InGameControlsEnabledScreen {
     private float lastInnerRatio = -1f;
     private int lastSlices = -1;
 
-    private final InputUtil.Key openKey;
+    private final InputConstants.Key openKey;
     private int selected = -1;
 
-    private final long openedAt = Util.getMeasuringTimeMs();
+    private final long openedAt = Util.getMillis();
     private float inEase;
 
-    public RadialMenuScreen(List<RadialOption> options, InputUtil.Key key) {
-        super(Text.literal("RadialMacros"));
+    public RadialMenuScreen(List<RadialOption> options, InputConstants.Key key) {
+        super(Component.literal("RadialMacros"));
         this.options = options;
         this.openKey = key;
     }
@@ -54,7 +54,7 @@ public class RadialMenuScreen extends InGameControlsEnabledScreen {
     }
 
     @Override
-    public void render(DrawContext ctx, int mouseX, int mouseY, float delta) {
+    public void extractRenderState(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float delta) {
         float innerRatio = innerR / (float)(innerR + thickness);
         int slices = Math.max(1, options.size());
         if (baked == null || slices != lastSlices || Math.abs(innerRatio - lastInnerRatio) > 0.001f) {
@@ -67,7 +67,7 @@ public class RadialMenuScreen extends InGameControlsEnabledScreen {
             lastInnerRatio = innerRatio;
         }
 
-        inEase = Math.min(1f, (Util.getMeasuringTimeMs() - openedAt) / 120f);
+        inEase = Math.min(1f, (Util.getMillis() - openedAt) / 120f);
         float pop = easeOutBack(inEase);
 
         float sector = 360f / slices;
@@ -84,11 +84,11 @@ public class RadialMenuScreen extends InGameControlsEnabledScreen {
         drawIcons(ctx, pop, startDeg);
         drawCenter(ctx, mouseX, mouseY, pop);
 
-        super.render(ctx, mouseX, mouseY, delta);
+        super.extractRenderState(ctx, mouseX, mouseY, delta);
     }
 
     @Override
-    public boolean mouseClicked(Click click, boolean doubled) {
+    public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
         if (click.button() == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
             boolean inCenter = dist((float) click.x(),(float) click.y(), cx, cy) < innerR * 0.85f;
             if (!inCenter && getSelectedOption() != null)
@@ -109,20 +109,20 @@ public class RadialMenuScreen extends InGameControlsEnabledScreen {
         RadialOption opt = getSelectedOption();
         if (opt != null) opt.run();
         InputHandler.latchUntilReleased();
-        close();
+        onClose();
     }
 
     private void cancelAndClose() {
         InputHandler.latchUntilReleased();
-        close();
+        onClose();
     }
 
     @Override
     public void tick() {
-        Window window = MinecraftClient.getInstance().getWindow();
-        boolean down = (openKey.type == InputUtil.Type.MOUSE)
-                ? GLFW.glfwGetMouseButton(window.getHandle(), openKey.getCode()) == GLFW.GLFW_PRESS
-                : InputUtil.isKeyPressed(window, openKey.getCode());
+        Window window = Minecraft.getInstance().getWindow();
+        boolean down = (openKey.type == InputConstants.Type.MOUSE)
+                ? GLFW.glfwGetMouseButton(window.handle(), openKey.getValue()) == GLFW.GLFW_PRESS
+                : InputConstants.isKeyDown(window, openKey.getValue());
 
         if (!down)
             activateAndClose();
@@ -131,8 +131,8 @@ public class RadialMenuScreen extends InGameControlsEnabledScreen {
     }
 
     @Override
-    public void close() {
-        super.close();
+    public void onClose() {
+        super.onClose();
         baked = null;
     }
 
@@ -142,7 +142,7 @@ public class RadialMenuScreen extends InGameControlsEnabledScreen {
         return options.get(selected);
     }
 
-    private void drawIcons(DrawContext ctx, float pop, float startDeg) {
+    private void drawIcons(GuiGraphicsExtractor ctx, float pop, float startDeg) {
         if (options.isEmpty()) return;
         float sector = 360f / options.size();
 
@@ -154,40 +154,40 @@ public class RadialMenuScreen extends InGameControlsEnabledScreen {
 
             int size = 24;
             float scale = size / 16f;
-            var m = ctx.getMatrices();
+            var m = ctx.pose();
             m.pushMatrix();
             m.translate(ix, iy);
             m.scale(scale, scale);
             m.translate(-8, -8);
             var stack = options.get(i).getIcon();
-            ctx.drawItem(stack, 0, 0);
+            ctx.item(stack, 0, 0);
             m.popMatrix();
         }
     }
 
-    private void drawCenter(DrawContext ctx, int mouseX, int mouseY, float pop) {
+    private void drawCenter(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float pop) {
         int rInner = (int) (innerR * pop);
         boolean inCenter = dist(mouseX, mouseY, cx, cy) < rInner * 0.85f;
 
         if (inCenter) {
             String x = "✕";
-            int tw = MinecraftClient.getInstance().textRenderer.getWidth(x);
-            ctx.drawText(MinecraftClient.getInstance().textRenderer, Text.literal(x), cx - tw / 2, cy - 4, 0xFFFFFFFF, true);
+            int tw = Minecraft.getInstance().font.width(x);
+            ctx.text(Minecraft.getInstance().font, Component.literal(x), cx - tw / 2, cy - 4, 0xFFFFFFFF, true);
         } else {
             RadialOption opt = getSelectedOption();
             if (opt != null) {
                 int size = Math.max(28, (int) (thickness * 0.9f));
                 float scale = size / 16f;
-                Matrix3x2fStack m = ctx.getMatrices();
+                Matrix3x2fStack m = ctx.pose();
                 m.pushMatrix();
                 m.translate(cx, cy);
                 m.scale(scale, scale);
                 m.translate(-8, -8);
-                ctx.drawItem(opt.getIcon(), 0, 0);
+                ctx.item(opt.getIcon(), 0, 0);
                 m.popMatrix();
 
-                int tw = MinecraftClient.getInstance().textRenderer.getWidth(opt.getName());
-                ctx.drawText(MinecraftClient.getInstance().textRenderer, Text.literal(opt.getName()), cx - tw / 2, cy + size / 2 + 8, 0xFFFFFFFF, true);
+                int tw = Minecraft.getInstance().font.width(opt.getName());
+                ctx.text(Minecraft.getInstance().font, Component.literal(opt.getName()), cx - tw / 2, cy + size / 2 + 8, 0xFFFFFFFF, true);
             }
         }
     }

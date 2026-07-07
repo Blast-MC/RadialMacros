@@ -1,10 +1,10 @@
 package tech.blastmc.radial.config.screen.list.entry;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.network.chat.Component;
 import tech.blastmc.radial.macros.RadialGroup;
 import tech.blastmc.radial.util.KeyboardUtils;
 
@@ -17,8 +17,8 @@ public class GroupEntry extends ListEntry {
     private int width;
     private List<RadialGroup> groups;
     private IntConsumer onEdit;
-    private final ButtonWidget editBtn;
-    private final ButtonWidget deleteBtn;
+    private final Button editBtn;
+    private final Button deleteBtn;
 
     public GroupEntry(int index, int width, List<RadialGroup> groups, Runnable rebuildCallback, IntConsumer onEdit) {
         super(rebuildCallback);
@@ -27,38 +27,38 @@ public class GroupEntry extends ListEntry {
         this.groups = groups;
         this.onEdit = onEdit;
 
-        editBtn = ButtonWidget.builder(Text.literal("Edit"), b -> onEdit.accept(index))
-                .dimensions(0, 0, 54, 20).build();
+        editBtn = Button.builder(Component.literal("Edit"), b -> onEdit.accept(index))
+                .bounds(0, 0, 54, 20).build();
 
-        deleteBtn = ButtonWidget.builder(Text.literal("Delete"), b -> {
+        deleteBtn = Button.builder(Component.literal("Delete"), b -> {
                     if (groups.size() <= 1) return; // keep at least one
                     groups.remove(this.index);
                     rebuildList();
                 })
-                .dimensions(0, 0, 54, 20).build();
+                .bounds(0, 0, 54, 20).build();
     }
 
     private static boolean isMouse(int code) { return code < 0; }
     private static int mouseButtonFromCode(int code) { return -code - 1; }
 
-    private Text keyTextFor(int code) {
-        return KeyboardUtils.toKey(code).getLocalizedText();
+    private Component keyTextFor(int code) {
+        return KeyboardUtils.toKey(code).getDisplayName();
     }
 
     @Override
-    public void render(DrawContext ctx, int mouseX, int mouseY, boolean hovered, float tickProgress) {
+    public void extractContent(GuiGraphicsExtractor ctx, int mouseX, int mouseY, boolean hovered, float tickProgress) {
         int bg = hovered ? 0x33FFFFFF : 0x22000000;
         ctx.fill(getX(), getY(), getX() + getWidth(), getY() + getHeight(), bg);
 
         RadialGroup g = groups.get(index);
 
-        int textY = getY() + (getHeight() - MinecraftClient.getInstance().textRenderer.fontHeight) / 2;
-        ctx.drawTextWithShadow(MinecraftClient.getInstance().textRenderer,
-                Text.literal(g.getName()),
+        int textY = getY() + (getHeight() - Minecraft.getInstance().font.lineHeight) / 2;
+        ctx.text(Minecraft.getInstance().font,
+                Component.literal(g.getName()),
                 getX() + 8, textY, 0xFFFFFFFF);
 
-        ctx.drawCenteredTextWithShadow(MinecraftClient.getInstance().textRenderer,
-                Text.literal("[ ").append(keyTextFor(g.getKeyCode())).append(" ]"),
+        ctx.centeredText(Minecraft.getInstance().font,
+                Component.literal("[ ").append(keyTextFor(g.getKeyCode())).append(" ]"),
                 width / 2 + 8, textY, 0xFFFFFFFF);
 
         int btnY = getY() + (getHeight() - 20) / 2;
@@ -68,12 +68,12 @@ public class GroupEntry extends ListEntry {
         editBtn.setX(right - 54 - 4 - 54);
         editBtn.setY(btnY);
 
-        editBtn.render(ctx, mouseX, mouseY, tickProgress);
-        deleteBtn.render(ctx, mouseX, mouseY, tickProgress);
+        editBtn.extractRenderState(ctx, mouseX, mouseY, tickProgress);
+        deleteBtn.extractRenderState(ctx, mouseX, mouseY, tickProgress);
     }
 
     @Override
-    public boolean mouseClicked(Click click, boolean doubled) {
+    public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
         if (editBtn.mouseClicked(click, doubled)) return true;
         if (deleteBtn.mouseClicked(click, doubled)) return true;
 
@@ -85,7 +85,7 @@ public class GroupEntry extends ListEntry {
     }
 
     @Override
-    public boolean mouseReleased(Click click) {
+    public boolean mouseReleased(MouseButtonEvent click) {
         editBtn.mouseReleased(click);
         deleteBtn.mouseReleased(click);
         return true;
