@@ -2,6 +2,8 @@ package tech.blastmc.radial;
 
 import net.fabricmc.api.ModInitializer;
 import net.minecraft.resources.Identifier;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
 import tech.blastmc.radial.config.Config;
 
 public class RadialMacros implements ModInitializer {
@@ -15,6 +17,10 @@ public class RadialMacros implements ModInitializer {
 	public void onInitialize() {
         Config.load();
         InputHandler.init();
+	}
+
+	public static void log(String message) {
+		LogManager.getLogger().log(Level.INFO, message);
 	}
 
 }

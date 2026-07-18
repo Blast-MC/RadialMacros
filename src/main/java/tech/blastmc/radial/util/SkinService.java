@@ -1,11 +1,14 @@
 package tech.blastmc.radial.util;
 
+import com.google.common.collect.ImmutableMultimap;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.properties.Property;
+import com.mojang.authlib.properties.PropertyMap;
 import net.minecraft.client.Minecraft;
 
 import java.net.URI;
@@ -111,9 +114,12 @@ public final class SkinService {
                                 }
                                 if (value == null) throw new RuntimeException("No textures property");
 
-                                GameProfile gp = new GameProfile(uuid, apiName);
-                                if (sig != null) gp.properties().put("textures", new com.mojang.authlib.properties.Property("textures", value, null));
-                                else gp.properties().put("textures", new com.mojang.authlib.properties.Property("textures", value));
+                                Property textureProperty = sig != null
+                                        ? new Property("textures", value, sig)
+                                        : new Property("textures", value);
+
+                                PropertyMap properties = new PropertyMap(ImmutableMultimap.of("textures", textureProperty));
+                                GameProfile gp = new GameProfile(uuid, apiName, properties);
 
                                 // Update cache on MC thread for safety
                                 Minecraft.getInstance().execute(() -> {

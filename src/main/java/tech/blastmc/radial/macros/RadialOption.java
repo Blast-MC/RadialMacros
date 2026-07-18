@@ -13,6 +13,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.DyedItemColor;
 import net.minecraft.world.item.component.ResolvableProfile;
+import tech.blastmc.radial.RadialMacros;
 import tech.blastmc.radial.macros.condition.ConditionalConfig;
 import tech.blastmc.radial.macros.condition.ConditionalityRule;
 import tech.blastmc.radial.util.SkinService;
@@ -120,6 +121,13 @@ public class RadialOption {
                         return;
                     if (skullOwner.equals(gp.name()))
                         stack.set(DataComponents.PROFILE, ResolvableProfile.createResolved(gp));
+                })
+                .whenComplete((ignored, throwable) -> {
+                    if (throwable != null) {
+                        throwable = unwrap(throwable);
+                        RadialMacros.log("Failed to fetch skin for " + skullOwner);
+                        throwable.printStackTrace();
+                    }
                 });
             }
 
@@ -142,6 +150,16 @@ public class RadialOption {
         } catch (Exception e) {
             return new ItemStack(Items.BARRIER);
         }
+    }
+
+    private static Throwable unwrap(Throwable throwable) {
+        while ((throwable instanceof java.util.concurrent.CompletionException
+                || throwable instanceof java.util.concurrent.ExecutionException)
+                && throwable.getCause() != null) {
+            throwable = throwable.getCause();
+        }
+
+        return throwable;
     }
 
     public boolean isVisible() {
