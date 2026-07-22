@@ -5,7 +5,5 @@ Features:
 - Configurable icons for each macro for easy selection
 - Single-key immediate commands (add 1 macro to a group)
 - Fully configurable in-game with Minecraft like GUIs
-
-Future Plans:
-- Variables in commands
-- Command Options (add to chat, copy, etc)
+- Different macro types for commands, chat messages, copy to clipboard, and delays between commands
+- Variable system that uses reflections to find values
