@@ -26,6 +26,8 @@ import tech.blastmc.radial.config.screen.list.entry.DetailsEntries.VisibilityLab
 import tech.blastmc.radial.config.screen.list.entry.DetailsEntries.VisibilityModeEntry;
 import tech.blastmc.radial.macros.RadialGroup;
 import tech.blastmc.radial.macros.RadialOption;
+import tech.blastmc.radial.macros.RadialOption.RadialCommand;
+import tech.blastmc.radial.macros.RadialOption.RadialCommand.CommandType;
 import tech.blastmc.radial.macros.condition.ConditionalConfig;
 import tech.blastmc.radial.macros.condition.ConditionalityRule;
 
@@ -120,7 +122,7 @@ public class OptionEditScreen extends Screen {
             commandsList.addEntry(new CommandEntry(i, option.getCommands(), this::refreshCommands));
         }
         commandsList.addEntry(new AddEntryEntry("Add Command", () -> {
-            option.getCommands().add("");
+            option.getCommands().add(new RadialCommand(CommandType.COMMAND, ""));
             refreshCommands();
         }));
     }
@@ -219,7 +221,7 @@ public class OptionEditScreen extends Screen {
         if (!option.isDyeable())
             option.setRgb(null);
 
-        option.getCommands().removeIf(String::isEmpty);
+        option.getCommands().removeIf(c -> c.getValue().isEmpty());
     }
 
 }

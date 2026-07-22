@@ -84,7 +84,8 @@ public class DetailsEntries {
             context.text(Minecraft.getInstance().font, "Icon",
                     getX(), getY() + getItemHeight() - Minecraft.getInstance().font.lineHeight / 2,  0xFFFFFFFF);
 
-            context.item(option.getIcon(), getX() + getWidth() - 16, getY() + getItemHeight() - 10);
+            if (ScreenUtils.canDrawItems())
+                context.item(option.getIcon(), getX() + getWidth() - 16, getY() + getItemHeight() - 10);
         }
 
         @Override

@@ -7,6 +7,7 @@ import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import tech.blastmc.radial.macros.RadialGroup;
 import tech.blastmc.radial.macros.RadialOption;
+import tech.blastmc.radial.util.ScreenUtils;
 
 import java.util.function.IntConsumer;
 
@@ -51,7 +52,8 @@ public class OptionEntry extends ListEntry {
         int bg = hovered ? 0x33FFFFFF : 0x22000000;
         ctx.fill(getX(), getY(), getX() + getWidth(), getY() + getHeight(), bg);
 
-        ctx.item(option.getIcon(), getX() + 4, getY() + (getHeight() - 16) / 2);
+        if (ScreenUtils.canDrawItems())
+            ctx.item(option.getIcon(), getX() + 4, getY() + (getHeight() - 16) / 2);
 
         int textY = getY() + (getHeight() - Minecraft.getInstance().font.lineHeight) / 2 + 1;
         ctx.text(Minecraft.getInstance().font,

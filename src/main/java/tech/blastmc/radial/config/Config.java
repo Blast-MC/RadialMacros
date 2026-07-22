@@ -21,6 +21,7 @@ public class Config {
 	public final static Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 	public final static Path GAME_CONFIG_DIR = FabricLoader.getInstance().getConfigDir();
 	public final static File CONFIG_FILE = new File(configDir(), MOD_ID + ".json");
+	public final static String CONFIG_VERSION = "1.1";
 
 	public static File configDir() {
 		File mapConfigDir = GAME_CONFIG_DIR.toFile();
@@ -76,8 +77,14 @@ public class Config {
         String version = "1.0";
         if (json.has("version"))
             version = json.get("version").getAsString();
-        // TODO - data migration if ever needed
+		boolean upgraded = false;
+		if (!Database.get().getVersion().equalsIgnoreCase(version)) {
+			DataMigrator.update(json, version);
+			upgraded = true;
+		}
 		Database.setGroups(GSON.fromJson(json, Database.class).groups);
+		if (upgraded)
+			save();
 	}
 
 }

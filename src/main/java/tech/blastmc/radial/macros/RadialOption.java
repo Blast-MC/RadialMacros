@@ -3,7 +3,7 @@ package tech.blastmc.radial.macros;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import net.minecraft.client.Minecraft;
+import lombok.Getter;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
@@ -35,7 +35,7 @@ public class RadialOption {
     private String itemModel;
     private boolean enchanted;
     private String skullOwner;
-    private List<String> commands;
+    private List<RadialCommand> commands;
     private boolean conditional;
     private List<ConditionalConfig> rules;
 
@@ -43,7 +43,7 @@ public class RadialOption {
     private transient long skullOwnerLastUpdate;
     private transient RadialGroup group;
 
-    public RadialOption(RadialGroup group, String name, ItemStack icon, List<String> commands) {
+    public RadialOption(RadialGroup group, String name, ItemStack icon, List<RadialCommand> commands) {
         this.group = group;
         this.name = name;
         this.material = icon.getItem().toString();
@@ -62,17 +62,7 @@ public class RadialOption {
         if (commands == null || commands.isEmpty())
             return;
 
-        Minecraft mc = Minecraft.getInstance();
-        if (mc == null)
-            return;
-        var network = mc.getConnection();
-        if (network == null)
-            return;
-
-        for (String command : commands) {
-            String raw = command.startsWith("/") ? command.substring(1) : command;
-            network.sendCommand(raw);
-        }
+        new CommandsRunner(commands).run();
     }
 
     public void setSkullOwner(String skullOwner) {
@@ -183,5 +173,28 @@ public class RadialOption {
             default -> null;
         };
     }
+
+    @Data
+    @AllArgsConstructor
+    public static class RadialCommand {
+        private CommandType type;
+        private String value;
+
+        @Getter
+        @AllArgsConstructor
+        public enum CommandType {
+            COMMAND("/say hello", "Command", "Run a command directly"),
+            SUGGEST("/say hello", "Suggest", "Add text to your chat bar without sending"),
+            CHAT( "hello!", "Chat", "Send a chat message immediately"),
+            COPY("hello!", "Copy", "Copy a message directly to your clipboard"),
+            WAIT( "1", "Wait", "Time in ticks before next command is run");
+
+            final String placeholder;
+            final String name;
+            final String tooltip;
+        }
+    }
+
+
 
 }

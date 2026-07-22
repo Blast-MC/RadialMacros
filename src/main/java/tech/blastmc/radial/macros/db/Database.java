@@ -1,5 +1,7 @@
 package tech.blastmc.radial.macros.db;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.lwjgl.glfw.GLFW;
 import tech.blastmc.radial.config.Config;
 import tech.blastmc.radial.macros.RadialGroup;
@@ -10,7 +12,9 @@ import java.util.List;
 
 public class Database {
 
-    private final String version = "1.0";
+    @Getter
+    @Setter
+    private String version = "1.1";
 
     public List<RadialGroup> groups = new ArrayList<>() {{
         add(new RadialGroup("Example Group", GLFW.GLFW_KEY_Y, new ArrayList<>()));

@@ -4,7 +4,9 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.Items;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -32,6 +34,16 @@ public class ScreenUtils {
             textField.setTooltipDelay(Duration.ofMillis(250));
         }
         return textField;
+    }
+
+    public static <T> T nextWithLoop(Class<? extends T> clazz, int ordinal) {
+        T[] values = clazz.getEnumConstants();
+        int next = ordinal + 1 % values.length;
+        return next >= values.length ? values[0] : values[next];
+    }
+
+    public static boolean canDrawItems() {
+        return BuiltInRegistries.ITEM.wrapAsHolder(Items.GRASS_BLOCK).areComponentsBound();
     }
 
 }
